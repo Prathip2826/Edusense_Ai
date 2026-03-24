@@ -212,22 +212,69 @@
     .chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 8px}
     .chip{padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface);border:1.5px solid var(--br);color:var(--tx2);cursor:pointer;transition:all var(--dur)}
     .chip:hover{border-color:var(--v1);color:var(--v1);background:rgba(99,102,241,.07);box-shadow:0 0 12px rgba(99,102,241,.15)}
-    /* Quiz */
-    .qopt{display:flex;align-items:center;gap:12px;padding:13px 16px;border:2px solid var(--br);border-radius:var(--rad);cursor:pointer;transition:all var(--dur);background:var(--surface);font-size:14px;color:var(--tx);margin-bottom:9px;font-weight:500}
-    .qopt:hover:not(.locked){border-color:var(--v1);background:rgba(99,102,241,.06);transform:translateX(4px);box-shadow:0 0 15px rgba(99,102,241,.15)}
-    .qopt.right{border-color:#10B981;background:rgba(16,185,129,.08);color:#10B981}
-    .qopt.wrong{border-color:#F43F5E;background:rgba(244,63,94,.08);color:#F43F5E}
-    .qopt.show-right{border-color:#10B981;background:rgba(16,185,129,.08)}
-    .locked{cursor:default}
-    .opt-let{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:var(--bg2);color:var(--tx2);transition:all var(--dur)}
-    .qpbar{height:6px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:24px}
-    .qpfill{height:100%;background:var(--grad);border-radius:99px;transition:width .4s var(--ease);box-shadow:0 0 10px rgba(99,102,241,.5)}
-    .expl{background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.2);border-radius:var(--rad);padding:13px 16px;margin-top:10px;font-size:13px;color:var(--tx2);line-height:1.7}
-    /* Quiz Timer */
-    .qtimer{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:99px;background:var(--bg2);border:1.5px solid var(--br);font-size:13px;font-weight:700;color:var(--tx2);transition:all .3s}
-    .qtimer.warn{background:rgba(245,158,11,.1);border-color:#F59E0B;color:#D97706}
-    .qtimer.danger{background:rgba(244,63,94,.1);border-color:#F43F5E;color:#F43F5E;animation:pulse-border .8s ease infinite}
-    @keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,.4)}50%{box-shadow:0 0 0 6px rgba(244,63,94,0)}}
+   function Quiz() {
+  const [selected, setSelected] = React.useState(null);
+  const [isAnswered, setIsAnswered] = React.useState(false);
+
+  // Example Question Data
+  const question = {
+    id: 1,
+    text: "Which of the following is a NoSQL database used in the MERN stack?",
+    options: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"],
+    correct: 2, // MongoDB is at index 2
+    explanation: "MongoDB is the 'M' in MERN and is a document-oriented NoSQL database."
+  };
+
+  const handleSelect = (index) => {
+    if (isAnswered) return;
+    setSelected(index);
+    setIsAnswered(true);
+  };
+
+  return (
+    <div className="card fu">
+      <div className="card-hd">
+        <span className="tag tb">Question #1</span>
+        <div className="qtimer"><i className="sb-icon">⏱</i> 15s</div>
+      </div>
+      
+      <h3 className="ph mb4">{question.text}</h3>
+
+      <div className="col gap-2">
+        {question.options.map((opt, i) => {
+          // Logical class selection
+          let stateClass = "";
+          if (isAnswered) {
+            if (i === question.correct) stateClass = "right";
+            else if (i === selected) stateClass = "wrong";
+            else stateClass = "locked";
+          }
+
+          return (
+            <div 
+              key={i} 
+              className={`qopt ${stateClass}`} 
+              onClick={() => handleSelect(i)}
+            >
+              <div className="opt-let">{String.fromCharCode(65 + i)}</div>
+              {opt}
+            </div>
+          );
+        })}
+      </div>
+
+      {isAnswered && (
+        <div className="expl fu mt4">
+          <div className="rb gap-2 mb2">
+            <span className="badge-icon">💡</span>
+            <strong>Explanation</strong>
+          </div>
+          {question.explanation}
+        </div>
+      )}
+    </div>
+  );
+}
     /* Study Plan */
     .daycard{border:1.5px solid var(--br);border-radius:var(--rad);overflow:hidden;transition:all var(--dur);margin-bottom:8px}
     .daycard:hover{border-color:rgba(99,102,241,.35);box-shadow:0 0 15px rgba(99,102,241,.1)}
