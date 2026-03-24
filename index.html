@@ -373,6 +373,7 @@
 <script type="text/babel">
 const {useState,useEffect,useRef,useCallback,useMemo}=React;
 
+
 /* ══ FIREBASE CONFIG ══ */
 const FB_CFG={apiKey:"AIzaSyDlTaJrL5NKrJisbqNsNZdVOFmSzvnT9jI",authDomain:"edusense-ai-91eb7.firebaseapp.com",projectId:"edusense-ai-91eb7",storageBucket:"edusense-ai-91eb7.firebasestorage.app",messagingSenderId:"145237561808",appId:"1:145237561808:web:8c3c9bd381d27955c1a9d5"};
 const FB_CONFIGURED=Object.values(FB_CFG).some(v=>v.length>0);
@@ -1506,7 +1507,7 @@ function App(){
   const [user,setUser]=useState(LS.g("es_user",null));
   const [page,setPage]=useState("dashboard");
   const [dark,setDark]=useState(LS.g("es_dark",false));
-  const [apiKey,setApiKey]=useState(LS.g("es_key",""));
+  const [apiKey,setApiKey]=useState(LS.g("es_key","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"));
   const [mobileOpen,setMobileOpen]=useState(false);
   useEffect(()=>{document.documentElement.setAttribute("data-theme",dark?"dark":"light");LS.s("es_dark",dark)},[dark]);
   useEffect(()=>{
