@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#08061A"/>
+  <meta name="description" content="EduSense AI — Elite AI-Powered Learning Platform"/>
+  <title>EduSense AI — Personalized Learning Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --font:'Plus Jakarta Sans',sans-serif;
+      --mono:'JetBrains Mono',monospace;
+      --display:'Fraunces',serif;
+      --v1:#6366F1;--v2:#8B5CF6;--v3:#A855F7;--v4:#EC4899;--v5:#F43F5E;--v6:#06B6D4;--v7:#10B981;--v8:#F59E0B;--v9:#EF4444;
+      --grad:linear-gradient(135deg,#6366F1,#A855F7,#EC4899);
+      --grad-h:linear-gradient(135deg,#4F46E5,#9333EA,#DB2777);
+      --grad-soft:linear-gradient(135deg,rgba(99,102,241,.15),rgba(168,85,247,.15),rgba(236,72,153,.15));
+      --grad-text:linear-gradient(135deg,#818CF8,#C084FC,#F472B6);
+      --grad-gold:linear-gradient(135deg,#F59E0B,#EF4444,#EC4899);
+      --bg:#FAFAFF;--bg2:#F3F4FF;--surface:#FFFFFF;--surface2:#F8F8FF;
+      --sidebar:#0B0720;--sidebar2:#130D2F;
+      --tx:#0D0B1A;--tx2:#4B4570;--tx3:#9B96B8;--tx-inv:#FFFFFF;
+      --br:#E2E0F0;--br2:#CBC7E8;
+      --stx:rgba(255,255,255,.55);--stx2:rgba(255,255,255,.85);--shov:rgba(255,255,255,.07);--sact:rgba(99,102,241,.25);
+      --sh-sm:0 1px 4px rgba(99,102,241,.08),0 1px 2px rgba(0,0,0,.04);
+      --sh:0 4px 20px rgba(99,102,241,.12);--sh-lg:0 20px 60px rgba(99,102,241,.2);
+      --sh-glow:0 0 30px rgba(99,102,241,.35);--sh-pink:0 0 30px rgba(236,72,153,.3);
+      --rad:14px;--rad-lg:20px;--rad-xl:28px;
+      --ease:cubic-bezier(.4,0,.2,1);--dur:.22s;--sidebar-w:260px;
+    }
+    [data-theme=dark]{
+      --bg:#08061A;--bg2:#0D0825;--surface:#120F2A;--surface2:#1A1535;
+      --tx:#F0EEFF;--tx2:#A09AC4;--tx3:#5C5580;--br:#241E45;--br2:#332D5A;
+      --grad-soft:linear-gradient(135deg,rgba(99,102,241,.2),rgba(168,85,247,.2),rgba(236,72,153,.2));
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:15px;scroll-behavior:smooth}
+    body{font-family:var(--font);background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.6;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+    ::selection{background:rgba(99,102,241,.25);color:#818CF8}
+    ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--br2);border-radius:99px}
+    button,input,select,textarea{font-family:var(--font);outline:none}
+    img{max-width:100%;display:block}a{color:var(--v1);text-decoration:none}
+    /* Layout */
+    .shell{display:flex;min-height:100vh}
+    .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+    .scrollpage{overflow-y:auto;height:calc(100vh - 60px)}
+    .ppad{padding:28px}
+    /* Sidebar */
+    .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow-y:auto;overflow-x:hidden;border-right:1px solid rgba(99,102,241,.12);transition:transform .3s var(--ease)}
+    .sb-bg-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);opacity:.1}
+    .sb-logo{position:relative;z-index:1;display:flex;align-items:center;gap:11px;padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .sb-mark{width:38px;height:38px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 20px rgba(168,85,247,.5)}
+    .sb-wordmark{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px}
+    .sb-wordmark em{background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+    /* Sidebar User */
+    .sb-user{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;transition:background var(--dur)}
+    .sb-user:hover{background:var(--shov)}
+    .sb-av-wrap{position:relative;flex-shrink:0}
+    .sb-av{width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden;border:2px solid rgba(99,102,241,.4);box-shadow:0 0 12px rgba(99,102,241,.4)}
+    .sb-av img{width:100%;height:100%;object-fit:cover}
+    .sb-online{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#10B981;border:2px solid var(--sidebar);box-shadow:0 0 6px rgba(16,185,129,.6)}
+    .sb-uname{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sb-urole{font-size:11px;color:var(--stx);margin-top:1px}
+    .sb-xp{margin-top:4px;display:flex;align-items:center;gap:6px}
+    .sb-xpbar-track{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+    .sb-xpbar-fill{height:100%;background:var(--grad);border-radius:99px;transition:width .5s var(--ease)}
+    .sb-xp-lbl{font-size:10px;color:var(--stx);white-space:nowrap;font-weight:600}
+    .sb-nav{padding:8px;flex:1;position:relative;z-index:1}
+    .sb-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px}
+    .sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;cursor:pointer;color:var(--stx);font-size:13px;font-weight:500;transition:all var(--dur) var(--ease);margin-bottom:1px;position:relative}
+    .sb-item:hover{background:var(--shov);color:var(--stx2)}
+    .sb-item.act{background:var(--sact);color:#fff}
+    .sb-item.act::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--grad);border-radius:0 3px 3px 0}
+    .sb-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+    .sb-badge{margin-left:auto;background:var(--grad);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;min-width:20px;text-align:center}
+    .sb-act-dot{margin-left:auto;width:6px;height:6px;border-radius:50%;background:#10B981;box-shadow:0 0 6px rgba(16,185,129,.7)}
+    .sb-footer{position:relative;z-index:1;padding:10px;border-top:1px solid rgba(255,255,255,.07)}
+    .theme-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;background:transparent;color:var(--stx);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all var(--dur)}
+    .theme-btn:hover{background:var(--shov);color:var(--stx2)}
+    .tpill{width:38px;height:20px;border-radius:99px;background:rgba(255,255,255,.12);margin-left:auto;position:relative;transition:background .3s;flex-shrink:0}
+    .tpill.on{background:var(--grad);box-shadow:0 0 12px rgba(99,102,241,.5)}
+    .tknob{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+    .tpill.on .tknob{transform:translateX(18px)}
+    .sb-hamb{display:none;position:fixed;top:14px;left:14px;z-index:300;width:40px;height:40px;border-radius:12px;background:var(--sidebar);border:1px solid rgba(99,102,241,.25);color:#fff;font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;backdrop-filter:blur(4px)}
+    /* Top Bar */
+    .topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);transition:background var(--dur),border-color var(--dur)}
+    .tb-title{font-size:16px;font-weight:800;color:var(--tx);flex:1;letter-spacing:-.2px}
+    .tb-avatar{width:34px;height:34px;border-radius:50%;cursor:pointer;overflow:hidden;border:2px solid var(--br2);background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+    .tb-avatar img{width:100%;height:100%;object-fit:cover}
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:11px;font-size:13.5px;font-weight:700;transition:all var(--dur) var(--ease);border:none;cursor:pointer;white-space:nowrap;font-family:var(--font)}
+    .btn-v{background:var(--grad);color:#fff;box-shadow:0 4px 15px rgba(99,102,241,.35)}
+    .btn-v:hover{background:var(--grad-h);transform:translateY(-2px);box-shadow:var(--sh-glow)}
+    .btn-v:active{transform:translateY(0)}
+    .btn-out{background:transparent;color:var(--tx);border:2px solid var(--br2)}
+    .btn-out:hover{border-color:var(--v1);color:var(--v1);background:rgba(99,102,241,.06)}
+    .btn-ghost{background:transparent;color:var(--tx2)}
+    .btn-ghost:hover{background:var(--bg2);color:var(--tx)}
+    .btn-google{background:var(--surface);border:2px solid var(--br);color:var(--tx)}
+    .btn-google:hover{border-color:var(--v1);box-shadow:var(--sh)}
+    .btn-danger{background:rgba(239,68,68,.12);color:var(--v9);border:none}
+    .btn-danger:hover{background:rgba(239,68,68,.2)}
+    .btn-sm{padding:6px 14px;font-size:12px;border-radius:9px}
+    .btn-lg{padding:14px 30px;font-size:15px;border-radius:var(--rad)}
+    .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+    .btn-icon{width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--bg2);color:var(--tx2);border:none;cursor:pointer;font-size:16px;transition:all var(--dur)}
+    .btn-icon:hover{background:var(--br);color:var(--tx)}
+    .w100{width:100%;justify-content:center}
+    /* Cards */
+    .card{background:var(--surface);border:1px solid var(--br);border-radius:var(--rad-lg);padding:22px;box-shadow:var(--sh-sm);transition:box-shadow var(--dur),border-color var(--dur),background var(--dur);position:relative;overflow:hidden}
+    .card:hover{box-shadow:var(--sh)}
+    .card-glow{position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad);border-radius:var(--rad-lg) var(--rad-lg) 0 0;opacity:0;transition:opacity var(--dur)}
+    .card:hover .card-glow{opacity:1}
+    .card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+    .card-title{font-size:14.5px;font-weight:800;color:var(--tx);letter-spacing:-.2px}
+    .card-sub{font-size:12px;color:var(--tx3);margin-top:3px}
+    /* Stat Cards */
+    .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .scard{background:var(--surface);border:1px solid var(--br);border-radius:var(--rad-lg);padding:20px 18px;position:relative;overflow:hidden;transition:all var(--dur) var(--ease)}
+    .scard:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+    .scard-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--rad-lg) var(--rad-lg) 0 0}
+    .scard-num{font-size:28px;font-weight:900;color:var(--tx);letter-spacing:-1px;line-height:1.1;margin-top:6px}
+    .scard-label{font-size:11px;font-weight:600;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:.06em}
+    .scard-emoji{position:absolute;right:14px;top:16px;font-size:26px;opacity:.15}
+    .scard-delta{font-size:11.5px;font-weight:700;margin-top:10px;display:flex;align-items:center;gap:4px}
+    .dup{color:#10B981}.ddn{color:#F43F5E}
+    /* Form */
+    .field{margin-bottom:16px}
+    .lbl{display:block;font-size:12.5px;font-weight:700;color:var(--tx2);margin-bottom:6px;letter-spacing:.01em}
+    .inp{width:100%;padding:11px 14px;border:2px solid var(--br);border-radius:var(--rad);background:var(--bg2);color:var(--tx);font-size:14px;transition:all var(--dur)}
+    .inp:focus{border-color:var(--v1);background:var(--surface);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+    .inp::placeholder{color:var(--tx3)}
+    select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath fill='%239B96B8' d='M7 8L0 0h14z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
+    textarea.inp{resize:vertical;min-height:90px;line-height:1.65}
+    /* Auth */
+    .auth-shell{min-height:100vh;display:flex}
+    .auth-left{width:46%;position:relative;overflow:hidden;background:linear-gradient(145deg,#0A0520,#14083A,#1A0A3E);display:flex;flex-direction:column;justify-content:center;padding:60px 56px}
+    .auth-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.35) 0%,transparent 70%);top:-150px;right:-150px;pointer-events:none;animation:orbpulse 6s ease-in-out infinite}
+    .auth-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.25) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none;animation:orbpulse 8s ease-in-out infinite reverse}
+    .auth-orb3{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.2) 0%,transparent 70%);top:50%;left:40%;pointer-events:none}
+    @keyframes orbpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+    .auth-content{position:relative;z-index:1}
+    .auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+    .auth-logo-mark{width:50px;height:50px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:0 0 30px rgba(168,85,247,.6)}
+    .auth-wordmark{font-size:23px;font-weight:900;color:#fff;letter-spacing:-.4px}
+    .auth-wordmark em{background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+    .auth-h1{font-family:var(--display);font-size:42px;color:#fff;line-height:1.1;margin-bottom:16px;letter-spacing:-.5px}
+    .auth-sub{font-size:14px;color:rgba(255,255,255,.6);line-height:1.75;max-width:360px;margin-bottom:32px}
+    .auth-feat{display:flex;align-items:center;gap:10px;padding:7px 0;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:600}
+    .auth-feat-icon{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid rgba(255,255,255,.12)}
+    .auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:var(--bg)}
+    .auth-box{width:100%;max-width:420px}
+    .auth-div{display:flex;align-items:center;gap:12px;color:var(--tx3);font-size:12px;margin:16px 0}
+    .auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--br)}
+    .auth-tab{display:flex;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:22px;border:1px solid var(--br)}
+    .auth-tab-btn{flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;background:transparent;color:var(--tx2);transition:all var(--dur)}
+    .auth-tab-btn.on{background:var(--grad);color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.35)}
+    /* Progress Bars */
+    .pb-wrap{margin-bottom:12px}
+    .pb-head{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:5px;color:var(--tx2)}
+    .pb-track{height:7px;background:var(--bg2);border-radius:99px;overflow:hidden}
+    .pb-fill{height:100%;border-radius:99px;transition:width 1s var(--ease)}
+    .pb-s{background:linear-gradient(90deg,#10B981,#34D399)}.pb-m{background:linear-gradient(90deg,#F59E0B,#FCD34D)}.pb-w{background:linear-gradient(90deg,#F43F5E,#FB7185)}.pb-v{background:var(--grad);box-shadow:0 0 8px rgba(99,102,241,.4)}
+    /* Tags */
+    .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.01em}
+    .tg{background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.25)}
+    .ta{background:rgba(245,158,11,.12);color:#D97706;border:1px solid rgba(245,158,11,.25)}
+    .tr{background:rgba(244,63,94,.12);color:#F43F5E;border:1px solid rgba(244,63,94,.25)}
+    .tp{background:rgba(168,85,247,.12);color:#A855F7;border:1px solid rgba(168,85,247,.25)}
+    .tb{background:rgba(99,102,241,.12);color:var(--v1);border:1px solid rgba(99,102,241,.25)}
+    .tc{background:rgba(6,182,212,.12);color:#06B6D4;border:1px solid rgba(6,182,212,.25)}
+    .tpk{background:rgba(236,72,153,.12);color:#EC4899;border:1px solid rgba(236,72,153,.25)}
+    .tgold{background:rgba(245,158,11,.15);color:#D97706;border:1px solid rgba(245,158,11,.3)}
+    /* Chat */
+    .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 60px)}
+    .chat-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+    .chat-foot{padding:12px 20px 16px;border-top:1px solid var(--br);background:var(--surface)}
+    .chat-row{display:flex;gap:8px;align-items:flex-end}
+    .chat-ta{flex:1;padding:11px 15px;border:2px solid var(--br);border-radius:var(--rad);background:var(--bg2);color:var(--tx);font-size:14px;resize:none;min-height:46px;max-height:150px;line-height:1.55;transition:all var(--dur)}
+    .chat-ta:focus{border-color:var(--v1);background:var(--surface);box-shadow:0 0 0 4px rgba(99,102,241,.1)}
+    .chat-send{width:46px;height:46px;border-radius:12px;background:var(--grad);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;transition:all var(--dur);box-shadow:0 4px 15px rgba(99,102,241,.4)}
+    .chat-send:hover{transform:scale(1.08);box-shadow:var(--sh-glow)}
+    .chat-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .msg{display:flex;gap:10px;max-width:82%}
+    .msg.me{flex-direction:row-reverse;align-self:flex-end}
+    .msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700}
+    .msg-av.ai{background:linear-gradient(135deg,#1a0a3e,#6366F1);color:#C4B5FD;border:2px solid rgba(99,102,241,.4);box-shadow:0 0 12px rgba(99,102,241,.3)}
+    .msg-av.me{background:var(--bg2);color:var(--tx2);border:2px solid var(--br);overflow:hidden}
+    .msg-av.me img{width:100%;height:100%;object-fit:cover}
+    .bbl{padding:11px 15px;border-radius:18px;font-size:14px;line-height:1.7}
+    .bbl.ai{background:var(--surface);border:1px solid var(--br);border-radius:4px 18px 18px 18px;color:var(--tx);box-shadow:var(--sh-sm)}
+    .bbl.me{background:var(--grad);color:#fff;border-radius:18px 4px 18px 18px;box-shadow:0 4px 15px rgba(99,102,241,.35)}
+    .bbl strong{font-weight:800}.bbl ul,.bbl ol{padding-left:18px;margin:6px 0}.bbl li{margin:4px 0}
+    .bbl code{font-family:var(--mono);font-size:12px;background:rgba(99,102,241,.1);padding:1px 6px;border-radius:5px;color:#A78BFA}
+    .bbl p{margin-bottom:6px}.bbl p:last-child{margin-bottom:0}.bbl h3,.bbl h4{margin:10px 0 5px;font-size:14px}
+    .msg-t{font-size:10px;color:var(--tx3);margin-top:4px;text-align:right}
+    .typing{display:flex;gap:5px;align-items:center;padding:5px 2px}
+    .typing span{width:8px;height:8px;border-radius:50%;background:var(--v1);animation:tdot 1.2s ease infinite}
+    .typing span:nth-child(2){animation-delay:.2s;background:var(--v3)}.typing span:nth-child(3){animation-delay:.4s;background:var(--v4)}
+    @keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 8px}
+    .chip{padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface);border:1.5px solid var(--br);color:var(--tx2);cursor:pointer;transition:all var(--dur)}
+    .chip:hover{border-color:var(--v1);color:var(--v1);background:rgba(99,102,241,.07);box-shadow:0 0 12px rgba(99,102,241,.15)}
+    /* Quiz */
+    .qopt{display:flex;align-items:center;gap:12px;padding:13px 16px;border:2px solid var(--br);border-radius:var(--rad);cursor:pointer;transition:all var(--dur);background:var(--surface);font-size:14px;color:var(--tx);margin-bottom:9px;font-weight:500}
+    .qopt:hover:not(.locked){border-color:var(--v1);background:rgba(99,102,241,.06);transform:translateX(4px);box-shadow:0 0 15px rgba(99,102,241,.15)}
+    .qopt.right{border-color:#10B981;background:rgba(16,185,129,.08);color:#10B981}
+    .qopt.wrong{border-color:#F43F5E;background:rgba(244,63,94,.08);color:#F43F5E}
+    .qopt.show-right{border-color:#10B981;background:rgba(16,185,129,.08)}
+    .locked{cursor:default}
+    .opt-let{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:var(--bg2);color:var(--tx2);transition:all var(--dur)}
+    .qpbar{height:6px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-bottom:24px}
+    .qpfill{height:100%;background:var(--grad);border-radius:99px;transition:width .4s var(--ease);box-shadow:0 0 10px rgba(99,102,241,.5)}
+    .expl{background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.2);border-radius:var(--rad);padding:13px 16px;margin-top:10px;font-size:13px;color:var(--tx2);line-height:1.7}
+    /* Quiz Timer */
+    .qtimer{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:99px;background:var(--bg2);border:1.5px solid var(--br);font-size:13px;font-weight:700;color:var(--tx2);transition:all .3s}
+    .qtimer.warn{background:rgba(245,158,11,.1);border-color:#F59E0B;color:#D97706}
+    .qtimer.danger{background:rgba(244,63,94,.1);border-color:#F43F5E;color:#F43F5E;animation:pulse-border .8s ease infinite}
+    @keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,.4)}50%{box-shadow:0 0 0 6px rgba(244,63,94,0)}}
+    /* Study Plan */
+    .daycard{border:1.5px solid var(--br);border-radius:var(--rad);overflow:hidden;transition:all var(--dur);margin-bottom:8px}
+    .daycard:hover{border-color:rgba(99,102,241,.35);box-shadow:0 0 15px rgba(99,102,241,.1)}
+    .dayhd{padding:14px 16px;background:var(--surface);display:flex;align-items:center;gap:11px;cursor:pointer;transition:background var(--dur)}
+    .dayhd:hover{background:var(--surface2)}
+    .daynum{width:34px;height:34px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 4px 10px rgba(99,102,241,.35)}
+    .daybody{padding:12px 16px;background:var(--surface);border-top:1.5px solid var(--br)}
+    .toprow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--br)}
+    .toprow:last-child{border:none}
+    .chk{width:20px;height:20px;border-radius:7px;flex-shrink:0;border:2px solid var(--br2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--dur)}
+    .chk.dn{background:var(--grad);border-color:transparent;box-shadow:0 2px 8px rgba(99,102,241,.4)}
+    /* Grids */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .chart-box{position:relative;height:200px}
+    /* Utilities */
+    .rb{display:flex;align-items:center}.rbb{display:flex;align-items:center;justify-content:space-between}.col{display:flex;flex-direction:column}
+    .mt2{margin-top:8px}.mt3{margin-top:12px}.mt4{margin-top:16px}.mt6{margin-top:24px}
+    .mb2{margin-bottom:8px}.mb3{margin-bottom:12px}.mb4{margin-bottom:16px}.mb6{margin-bottom:24px}
+    .ph{font-size:21px;font-weight:900;letter-spacing:-.4px;color:var(--tx)}
+    .ps{font-size:13px;color:var(--tx3);margin-top:4px}
+    .mono{font-family:var(--mono)}.fw9{font-weight:900}.txm{color:var(--tx3)}
+    .txv{background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .spin{display:inline-block;width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spinr .7s linear infinite}
+    .spin-v{border-color:rgba(99,102,241,.2);border-top-color:var(--v1)}
+    @keyframes spinr{to{transform:rotate(360deg)}}
+    /* Modal / Overlay */
+    .overlay{position:fixed;inset:0;background:rgba(8,6,26,.65);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:fdin .2s ease}
+    .modal{background:var(--surface);border:1px solid var(--br);border-radius:var(--rad-xl);padding:28px;max-width:500px;width:94%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg),0 0 60px rgba(99,102,241,.15);animation:slideup .25s var(--ease)}
+    .confirm-modal{background:var(--surface);border:1px solid var(--br);border-radius:var(--rad-xl);padding:26px;max-width:380px;width:92%;box-shadow:var(--sh-lg);animation:slideup .25s var(--ease)}
+    .confirm-modal h3{font-size:17px;font-weight:900;color:var(--tx);margin-bottom:9px}
+    .confirm-modal p{font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:18px}
+    .confirm-btns{display:flex;gap:9px;justify-content:flex-end}
+    @keyframes fdin{from{opacity:0}to{opacity:1}}
+    @keyframes slideup{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fadeup .35s var(--ease) both}
+    .empty{text-align:center;padding:44px 20px;color:var(--tx3)}
+    .empty-ico{font-size:44px;margin-bottom:11px}
+    .empty h3{font-size:14px;color:var(--tx2);font-weight:700;margin-bottom:5px}
+    .schip{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:99px;font-size:12.5px;font-weight:700;border:2px solid var(--br);cursor:pointer;background:var(--surface);color:var(--tx2);transition:all var(--dur)}
+    .schip:hover{border-color:var(--v1);color:var(--v1)}
+    .schip.on{border-color:var(--v1);background:rgba(99,102,241,.1);color:var(--v1);box-shadow:0 0 15px rgba(99,102,241,.2)}
+    /* Notifications */
+    .notif{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--br);border-radius:var(--rad);padding:13px 17px;box-shadow:var(--sh-lg);z-index:999;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;animation:slideup .3s var(--ease);max-width:340px}
+    /* Profile */
+    .pcov{height:130px;border-radius:var(--rad-lg) var(--rad-lg) 0 0;background:linear-gradient(135deg,#0A0520,#1a0a3e,#6366F1,#A855F7,#EC4899);position:relative;overflow:hidden}
+    .pcov::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E")}
+    .pav-wrap{position:absolute;bottom:-44px;left:24px}
+    .pav{width:88px;height:88px;border-radius:50%;border:4px solid var(--surface);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;overflow:hidden;box-shadow:0 0 25px rgba(99,102,241,.4);cursor:pointer;position:relative}
+    .pav img{width:100%;height:100%;object-fit:cover}
+    .pav-edit-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%;font-size:20px;cursor:pointer}
+    .pav:hover .pav-edit-overlay{opacity:1}
+    /* Data Table */
+    .dtbl{width:100%;border-collapse:collapse;font-size:13px}
+    .dtbl th{padding:8px 12px;text-align:left;color:var(--tx3);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--br)}
+    .dtbl td{padding:11px 12px;border-bottom:1px solid var(--br);color:var(--tx2);vertical-align:middle}
+    .dtbl tr:last-child td{border:none}.dtbl tr:hover td{background:rgba(99,102,241,.04)}
+    .ring-wrap{position:relative;display:inline-flex}.ring-svg{transform:rotate(-90deg)}
+    .ring-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    .glow-card{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(168,85,247,.08),rgba(236,72,153,.06));border:1px solid rgba(99,102,241,.25)}
+    .tipbox{background:var(--grad-soft);border:1.5px solid rgba(99,102,241,.2);border-radius:var(--rad);padding:14px 16px;display:flex;align-items:flex-start;gap:11px;font-size:13.5px;color:var(--tx2);line-height:1.6}
+    /* Gamification */
+    .badge-grid{display:flex;flex-wrap:wrap;gap:12px}
+    .badge-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 16px;border-radius:var(--rad);border:1.5px solid var(--br);background:var(--surface);transition:all var(--dur);cursor:default;min-width:90px;text-align:center}
+    .badge-item.unlocked{border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.06);box-shadow:0 0 15px rgba(99,102,241,.1)}
+    .badge-item.locked{opacity:.4;filter:grayscale(1)}
+    .badge-icon{font-size:28px;line-height:1}
+    .badge-name{font-size:11px;font-weight:700;color:var(--tx2)}
+    .badge-desc{font-size:10px;color:var(--tx3)}
+    /* Leaderboard */
+    .lb-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;margin-bottom:6px;transition:all var(--dur)}
+    .lb-row:hover{background:var(--bg2)}
+    .lb-rank{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+    .lb-rank.gold{background:linear-gradient(135deg,#F59E0B,#FBBF24);color:#78350F;box-shadow:0 0 10px rgba(245,158,11,.4)}
+    .lb-rank.silver{background:linear-gradient(135deg,#9CA3AF,#D1D5DB);color:#374151}
+    .lb-rank.bronze{background:linear-gradient(135deg,#92400E,#D97706);color:#fff}
+    .lb-rank.other{background:var(--bg2);color:var(--tx3)}
+    .lb-av{width:34px;height:34px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid var(--br2)}
+    .lb-av img{width:100%;height:100%;object-fit:cover}
+    .lb-me .lb-av{border-color:var(--v1);box-shadow:0 0 10px rgba(99,102,241,.4)}
+    .lb-me{background:rgba(99,102,241,.06)!important;border:1.5px solid rgba(99,102,241,.2)}
+    /* XP / Level ring */
+    .level-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border-radius:99px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);cursor:default}
+    .level-circle{width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+    .level-text{font-size:12px;font-weight:700;color:var(--v1)}
+    /* Celebration */
+    @keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+    .pop{animation:pop .4s var(--ease) both}
+    /* Flash card section */
+    .flashcard{background:var(--surface);border:2px solid var(--br);border-radius:var(--rad-xl);padding:32px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;cursor:pointer;transition:all .3s;transform-style:preserve-3d;position:relative}
+    .flashcard:hover{border-color:var(--v1);box-shadow:var(--sh-glow)}
+    /* Responsive */
+    @media(max-width:900px){
+      .sgrid{grid-template-columns:repeat(2,1fr)}
+      .g3{grid-template-columns:1fr 1fr}
+      .auth-left{display:none}
+      .auth-right{padding:24px}
+    }
+    @media(max-width:700px){
+      .main{margin-left:0}
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .sb-hamb{display:flex}
+      .sb-overlay.open{display:block}
+      .g2{grid-template-columns:1fr}
+      .sgrid{grid-template-columns:repeat(2,1fr)}
+      .ppad{padding:16px}
+      .topbar{padding:0 16px 0 60px}
+    }
+    @media(max-width:480px){
+      .sgrid{grid-template-columns:1fr 1fr}
+      .g3{grid-template-columns:1fr}
+      .modal{padding:20px}
+    }
+    .api-input-wrap{position:relative}
+    .api-input-wrap .inp{padding-right:44px}
+    .api-vis-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--tx3);padding:4px}
+    .api-vis-btn:hover{color:var(--tx)}
+    .groq-link{color:var(--v1);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+    .streak-fire{display:inline-block;animation:streakfire 1.5s ease infinite}
+    @keyframes streakfire{0%,100%{transform:scale(1) rotate(-5deg)}50%{transform:scale(1.15) rotate(5deg)}}
+    .confetti-pop{position:fixed;inset:0;pointer-events:none;z-index:9999;display:flex;align-items:center;justify-content:center;font-size:80px;animation:confettifade 2.5s ease forwards}
+    @keyframes confettifade{0%{opacity:1;transform:scale(.5)}40%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.5)}}
+    /* Flashcard flip */
+    .fc-inner{transition:transform 0.5s;transform-style:preserve-3d;position:relative;width:100%;min-height:180px}
+    .fc-inner.flipped{transform:rotateY(180deg)}
+    .fc-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px}
+    .fc-back{transform:rotateY(180deg)}
+    /* Tooltip */
+    [data-tip]{position:relative;cursor:default}
+    [data-tip]::after{content:attr(data-tip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:5px 10px;border-radius:8px;font-size:11.5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;font-weight:600}
+    [data-tip]:hover::after{opacity:1}
+    input[type=range]{-webkit-appearance:none;height:6px;border-radius:99px;background:var(--bg2);cursor:pointer;border:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--grad);cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,.4)}
+    .fu-d1{animation-delay:.05s}.fu-d2{animation-delay:.1s}.fu-d3{animation-delay:.15s}.fu-d4{animation-delay:.2s}
+    .profile-cover-actions{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+/* ══ FIREBASE CONFIG ══ */
+const FB_CFG={apiKey:"AIzaSyDlTaJrL5NKrJisbqNsNZdVOFmSzvnT9jI",authDomain:"edusense-ai-91eb7.firebaseapp.com",projectId:"edusense-ai-91eb7",storageBucket:"edusense-ai-91eb7.firebasestorage.app",messagingSenderId:"145237561808",appId:"1:145237561808:web:8c3c9bd381d27955c1a9d5"};
+const FB_CONFIGURED=Object.values(FB_CFG).some(v=>v.length>0);
+let fbApp=null,fbAuth=null,fbDB=null;
+if(FB_CONFIGURED){try{fbApp=firebase.initializeApp(FB_CFG);fbAuth=firebase.auth();fbDB=firebase.firestore()}catch(e){console.warn("Firebase init error:",e)}}
+const fbUserToLocal=(fbUser,profile={})=>({id:fbUser.uid,name:fbUser.displayName||profile.name||"Student",email:fbUser.email||"",avatar:fbUser.photoURL||profile.avatar||"",subject:profile.subject||"cs",bio:profile.bio||"",google:!!fbUser.providerData?.find(p=>p.providerId==="google.com"),joinedAt:profile.joinedAt||new Date().toISOString()});
+async function saveUserProfile(uid,d){if(!fbDB)return;try{await fbDB.collection("users").doc(uid).set(d,{merge:true})}catch(e){}}
+async function loadUserProfile(uid){if(!fbDB)return null;try{const d=await fbDB.collection("users").doc(uid).get();return d.exists?d.data():null}catch(e){return null}}
+
+/* ══ LOCAL STORAGE ══ */
+const LS={g:(k,d)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d}catch{return d}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},d:(k)=>{try{localStorage.removeItem(k)}catch{}}};
+
+/* ══ GROQ API ══ */
+const groq=async(key,msgs,sys,max=1200)=>{
+  const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:sys},...msgs],max_tokens:max,temperature:.7})});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`API Error ${r.status}`)}
+  const d=await r.json();return d.choices[0].message.content;
+};
+/* Embedded Anthropic API for advanced analysis */
+const claudeAI=async(prompt,max=1500)=>{
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:max,messages:[{role:"user",content:prompt}]})});
+  if(!r.ok){throw new Error(`Claude API Error ${r.status}`)}
+  const d=await r.json();return d.content?.[0]?.text||"";
+};
+
+/* ══ HELPERS ══ */
+const ini=(n="?")=>(n||"?").split(" ").map(p=>p[0]).slice(0,2).join("").toUpperCase()||"?";
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const ds=(d)=>{try{return new Date(d).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}catch{return""}};
+const timeStamp=()=>new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+const todayStr=()=>new Date().toDateString();
+
+/* ══ STREAK LOGIC (FIXED) ══
+   Streak only increases if user did a quiz TODAY and hasn't been counted yet today */
+const updateStreak=(uid)=>{
+  const lastDay=LS.g(`streak_day_${uid}`,"");
+  const today=todayStr();
+  if(lastDay===today)return; // already counted today
+  const lastDate=lastDay?new Date(lastDay):null;
+  const todayDate=new Date(today);
+  const diffDays=lastDate?Math.round((todayDate-lastDate)/(1000*60*60*24)):null;
+  const cur=LS.g(`streak_${uid}`,0);
+  if(diffDays===null||diffDays===1){LS.s(`streak_${uid}`,cur+1);}
+  else if(diffDays>1){LS.s(`streak_${uid}`,1);} // streak reset
+  LS.s(`streak_day_${uid}`,today);
+};
+
+/* ══ SUBJECTS ══ */
+const SUBJECTS=[
+  {id:"cs",l:"Computer Science",i:"💻",topics:["Data Structures","Algorithms","OOP","DBMS","Operating Systems","Computer Networks","Software Engineering","Web Development","Cybersecurity","Cloud Computing"]},
+  {id:"math",l:"Mathematics",i:"📐",topics:["Calculus","Linear Algebra","Discrete Mathematics","Statistics","Probability","Differential Equations","Number Theory","Graph Theory","Numerical Methods","Complex Analysis"]},
+  {id:"physics",l:"Physics",i:"⚛️",topics:["Mechanics","Thermodynamics","Electromagnetism","Optics","Quantum Physics","Relativity","Waves","Nuclear Physics","Fluid Mechanics","Solid State Physics"]},
+  {id:"chemistry",l:"Chemistry",i:"🧪",topics:["Organic Chemistry","Inorganic Chemistry","Physical Chemistry","Electrochemistry","Chemical Kinetics","Thermodynamics","Spectroscopy","Coordination Chemistry","Polymers","Environmental Chemistry"]},
+  {id:"biology",l:"Biology",i:"🧬",topics:["Cell Biology","Genetics","Ecology","Evolution","Physiology","Biochemistry","Microbiology","Botany","Zoology","Biotechnology"]},
+  {id:"aids",l:"AI & Data Science",i:"🤖",topics:["Machine Learning","Deep Learning","Data Analysis","Neural Networks","NLP","Computer Vision","Data Visualization","Feature Engineering","Reinforcement Learning","MLOps"]},
+];
+
+/* ══ PROMPTS ══ */
+const SYS_TUTOR=(name,subj)=>`You are EduSense AI Tutor, an expert academic assistant for ${name}, specialised in ${subj}. Be clear, engaging, and give structured explanations with examples. Use markdown for formatting. Always end with a question to check understanding.`;
+const SYS_QUIZ=`You are an expert quiz generator. Generate exactly 5 multiple-choice questions. Return ONLY valid JSON in this exact format: {"questions":[{"q":"Question text","options":["A","B","C","D"],"correct":"A","explanation":"Why A is correct"}]}. No extra text.`;
+const SYS_PLAN=(days,weak)=>`You are an expert academic planner. Create a structured ${days}-day study plan. Return ONLY valid JSON: {"title":"Plan title","duration":${days},"overview":"Brief description","days":[{"day":1,"goal":"Day goal","tip":"Study tip","topics":[{"name":"Topic","type":"concept|practice|revision|mock-test","duration":"30 mins","notes":"Notes"}]}]}. Focus weak areas: ${weak}.`;
+const SYS_ANALYSIS=`You are an academic performance analyst. Analyse quiz history and return JSON: {"summary":"Overall learning summary in 2-3 sentences","weakAreas":[{"topic":"name","rootCause":"why struggling","fix":"specific action"}],"strengths":["strength1"],"priorityActions":["Step 1","Step 2","Step 3","Step 4","Step 5"],"estimatedImprovement":"Expected improvement","weeklyGoal":"This week's focus goal","studyStyle":"Recommended study style","motivationTip":"Personalised motivational message"}`;
+const SYS_FLASH=`You are a flashcard generator. Generate 10 flashcards for the given topic. Return ONLY valid JSON: {"cards":[{"front":"Question or term","back":"Answer or definition"}]}`;
+
+/* ══ GAMIFICATION ══ */
+const BADGES=[
+  {id:"first_quiz",icon:"🎯",name:"First Shot",desc:"Complete first quiz",condition:(stats)=>stats.totalQ>=1},
+  {id:"streak3",icon:"🔥",name:"On Fire",desc:"3-day streak",condition:(stats)=>stats.streak>=3},
+  {id:"streak7",icon:"⚡",name:"Unstoppable",desc:"7-day streak",condition:(stats)=>stats.streak>=7},
+  {id:"perfect",icon:"💎",name:"Perfect",desc:"Score 100%",condition:(stats)=>stats.best>=100},
+  {id:"ten_quiz",icon:"📚",name:"Bookworm",desc:"10 quizzes done",condition:(stats)=>stats.totalQ>=10},
+  {id:"high_avg",icon:"🏆",name:"Scholar",desc:"Avg score ≥ 80%",condition:(stats)=>stats.avg>=80},
+  {id:"planner",icon:"📅",name:"Planner",desc:"Created study plan",condition:(stats)=>stats.hasPlan},
+  {id:"analyzer",icon:"🔬",name:"Analyst",desc:"Ran weakness analysis",condition:(stats)=>stats.analyzed},
+  {id:"chat10",icon:"💬",name:"Chatterbox",desc:"Sent 10+ chat msgs",condition:(stats)=>stats.chatCount>=10},
+  {id:"multi_sub",icon:"🌐",name:"Polymath",desc:"Quizzed 3+ subjects",condition:(stats)=>stats.uniqueSubjects>=3},
+  {id:"pass_rate",icon:"✅",name:"Consistent",desc:"Pass rate ≥ 70%",condition:(stats)=>stats.passRate>=70},
+  {id:"hard_quiz",icon:"💪",name:"Challenge",desc:"Complete hard quiz",condition:(stats)=>stats.hardCount>=1},
+];
+const XP_PER_QUIZ=50;const XP_PER_CORRECT=10;const XP_STREAK_BONUS=25;
+const getLevel=(xp)=>{const lvls=[0,100,250,500,1000,2000,3500,5500,8000,12000,17000];let lv=1;for(let i=1;i<lvls.length;i++){if(xp>=lvls[i])lv=i+1;}return{level:lv,current:xp-lvls[lv-1],needed:lvls[lv]?lvls[lv]-lvls[lv-1]:1,next:lvls[lv]||null}};
+const LEVEL_NAMES=["","Novice","Apprentice","Learner","Student","Scholar","Expert","Master","Elite","Champion","Legend"];
+
+/* ══ COMPONENTS ══ */
+function Notif({msg,type,onClose}){
+  const col={success:"#10B981",error:"#F43F5E",info:"#6366F1",warning:"#F59E0B"}[type]||"#6366F1";
+  const ic={success:"✅",error:"❌",info:"ℹ️",warning:"⚠️"}[type]||"ℹ️";
+  useEffect(()=>{const t=setTimeout(onClose,4000);return()=>clearTimeout(t)},[]);
+  return <div className="notif" style={{borderLeft:`3px solid ${col}`}}><span>{ic}</span><span style={{flex:1}}>{msg}</span><button className="btn-icon" style={{width:26,height:26,fontSize:13,flexShrink:0}} onClick={onClose}>✕</button></div>;
+}
+function ConfirmModal({title,message,onConfirm,onCancel}){
+  return <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)onCancel()}}><div className="confirm-modal"><h3>{title}</h3><p>{message}</p><div className="confirm-btns"><button className="btn btn-out btn-sm" onClick={onCancel}>Cancel</button><button className="btn btn-danger btn-sm" onClick={onConfirm}>Confirm</button></div></div></div>;
+}
+
+/* ══ SIDEBAR ══ */
+function Sidebar({user,page,go,logout,dark,toggleDark,mobileOpen,setMobileOpen}){
+  const uid=user.id;
+  const hist=LS.g(`qh_${uid}`,[]);
+  const streak=LS.g(`streak_${uid}`,0);
+  const xp=LS.g(`xp_${uid}`,0);
+  const lv=getLevel(xp);
+  const nav=[
+    {sec:"Learn",items:[{id:"dashboard",i:"🏠",l:"Dashboard"},{id:"chat",i:"💬",l:"AI Tutor"},{id:"quiz",i:"⚡",l:"Quiz Generator"},{id:"plan",i:"📅",l:"Study Plan"},{id:"flashcards",i:"🃏",l:"Flashcards"}]},
+    {sec:"Insights",items:[{id:"progress",i:"📊",l:"Progress"},{id:"weakness",i:"🎯",l:"Weakness AI"},{id:"leaderboard",i:"🏆",l:"Leaderboard"}]},
+    {sec:"Account",items:[{id:"profile",i:"👤",l:"Profile"},{id:"settings",i:"⚙️",l:"Settings"}]},
+  ];
+  const close=()=>setMobileOpen(false);
+  return(
+    <>
+      <div className={`sb-overlay${mobileOpen?" open":""}`} onClick={close}/>
+      <div className={`sidebar${mobileOpen?" open":""}`}>
+        <div className="sb-bg-orb" style={{width:300,height:300,background:"radial-gradient(circle,rgba(99,102,241,1) 0%,transparent 70%)",top:-100,left:-100}}/>
+        <div className="sb-bg-orb" style={{width:200,height:200,background:"radial-gradient(circle,rgba(236,72,153,1) 0%,transparent 70%)",bottom:50,right:-60}}/>
+        <div className="sb-logo">
+          <div className="sb-mark">🧠</div>
+          <div className="sb-wordmark">EduSense <em>AI</em></div>
+        </div>
+        <div className="sb-user" onClick={()=>{go("profile");close()}}>
+          <div className="sb-av-wrap">
+            <div className="sb-av">{user?.avatar?<img src={user.avatar} alt="" onError={e=>{e.target.style.display="none"}}/>:ini(user?.name)}</div>
+            <div className="sb-online"/>
+          </div>
+          <div style={{flex:1,minWidth:0}}>
+            <div className="sb-uname">{user?.name||"Student"}</div>
+            <div className="sb-urole">Lv.{lv.level} {LEVEL_NAMES[lv.level]||"Student"} · {streak>0?`🔥${streak}d`:SUBJECTS.find(s=>s.id===user?.subject)?.l||""}</div>
+            <div className="sb-xp">
+              <div className="sb-xpbar-track"><div className="sb-xpbar-fill" style={{width:Math.min(100,pct(lv.current,lv.needed))+"%"}}/></div>
+              <div className="sb-xp-lbl">{lv.current}/{lv.needed} XP</div>
+            </div>
+          </div>
+        </div>
+        <nav className="sb-nav">
+          {nav.map(g=>(
+            <div key={g.sec} style={{marginBottom:4}}>
+              <div className="sb-sec">{g.sec}</div>
+              {g.items.map(item=>(
+                <div key={item.id} className={`sb-item${page===item.id?" act":""}`} onClick={()=>{go(item.id);close()}}>
+                  <span className="sb-icon">{item.i}</span>{item.l}
+                  {page===item.id&&<div className="sb-act-dot"/>}
+                </div>
+              ))}
+            </div>
+          ))}
+          <div style={{marginBottom:4}}>
+            <div className="sb-sec">Session</div>
+            <div className="sb-item" onClick={logout} style={{color:"#FB7185"}}><span className="sb-icon">🚪</span>Sign Out</div>
+          </div>
+        </nav>
+        <div className="sb-footer">
+          <button className="theme-btn" onClick={toggleDark}><span>{dark?"☀️":"🌙"}</span><span>{dark?"Light Mode":"Dark Mode"}</span><div className={`tpill${dark?" on":""}`}><div className="tknob"/></div></button>
+          <div style={{marginTop:8,padding:"9px 8px",borderRadius:9,background:"rgba(255,255,255,.04)",color:"rgba(255,255,255,.25)",fontSize:10.5,lineHeight:1.5,border:"1px solid rgba(255,255,255,.06)"}}>MEGAVERSE 2026 · AIDS Dept · MEC</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function TopBar({title,user,apiKey,go,children}){
+  return(
+    <div className="topbar">
+      <h1 className="tb-title">{title}</h1>
+      {children}
+      {!apiKey&&<div className="tag tr" style={{cursor:"pointer",fontWeight:700,flexShrink:0}} onClick={()=>go("settings")}>⚠️ Add API Key</div>}
+      <div className="tb-avatar" onClick={()=>go("profile")}>
+        {user?.avatar?<img src={user.avatar} alt="" onError={e=>{e.target.style.display='none'}}/>:ini(user?.name)}
+      </div>
+    </div>
+  );
+}
+
+/* ══ DASHBOARD ══ */
+function Dashboard({user,go,apiKey}){
+  const uid=user.id;
+  const hist=LS.g(`qh_${uid}`,[]);
+  const totalQ=hist.length;
+  const avg=totalQ?Math.round(hist.reduce((a,q)=>a+q.score,0)/totalQ):0;
+  const best=totalQ?Math.max(...hist.map(q=>q.score)):0;
+  const streak=LS.g(`streak_${uid}`,0);
+  const xp=LS.g(`xp_${uid}`,0);
+  const lv=getLevel(xp);
+  const plan=LS.g(`plan_${uid}`,null);
+  const pp=LS.g(`pp_${uid}`,{});
+  const pdone=Object.values(pp).filter(Boolean).length;
+  const ptotal=plan?.days?.reduce((a,d)=>a+d.topics.length,0)||0;
+  const subj=SUBJECTS.find(s=>s.id===user.subject)||SUBJECTS[0];
+  const chartRef=useRef();const ci=useRef();
+  const passRate=hist.length?Math.round(hist.filter(q=>q.score>=60).length/hist.length*100):0;
+  const uniqueSubjects=new Set(hist.map(q=>q.subject)).size;
+  const hardCount=hist.filter(q=>q.diff==="hard").length;
+  const chatCount=LS.g(`chat_count_${uid}`,0);
+  const analyzed=!!LS.g(`analysis_${uid}`,null);
+  const hasPlan=!!plan;
+  const allStats={totalQ,avg,best,streak,passRate,uniqueSubjects,hardCount,chatCount,analyzed,hasPlan};
+  const unlockedBadges=BADGES.filter(b=>b.condition(allStats));
+  useEffect(()=>{
+    if(!chartRef.current||hist.length===0)return;
+    if(ci.current){ci.current.destroy();ci.current=null}
+    const dk=document.documentElement.getAttribute("data-theme")==="dark";
+    const gc=dk?"rgba(255,255,255,.05)":"rgba(99,102,241,.06)";const tc=dk?"#5C5580":"#9B96B8";
+    ci.current=new Chart(chartRef.current,{type:"line",data:{labels:hist.slice(-10).map((_,i)=>`Q${i+1}`),datasets:[{data:hist.slice(-10).map(q=>q.score),borderColor:"#6366F1",backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,"rgba(99,102,241,.25)");g.addColorStop(1,"rgba(168,85,247,.02)");return g},fill:true,tension:.4,pointBackgroundColor:"#A855F7",pointRadius:5,pointHoverRadius:7,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gc},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11},callback:v=>v+"%"}},x:{grid:{color:gc},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11}}}}}});
+    return()=>{if(ci.current){ci.current.destroy();ci.current=null}};
+  },[hist.length]);
+  const topicStats=subj.topics.map(t=>{const m=hist.filter(q=>q.topic===t);return m.length?{t,s:Math.round(m.reduce((a,q)=>a+q.score,0)/m.length)}:null}).filter(Boolean).sort((a,b)=>a.s-b.s).slice(0,5);
+  const greet=()=>({0:"Good Morning",1:"Good Afternoon",2:"Good Evening"}[Math.floor(new Date().getHours()/8)]||"Hello");
+  const STRIPE=["linear-gradient(90deg,#6366F1,#A855F7)","linear-gradient(90deg,#06B6D4,#6366F1)","linear-gradient(90deg,#F59E0B,#EC4899)","linear-gradient(90deg,#10B981,#06B6D4)"];
+  return(
+    <div className="scrollpage"><div className="ppad fu">
+      <div className="rbb mb6">
+        <div>
+          <h1 className="ph">{greet()}, <span className="txv">{user.name.split(" ")[0]}</span> 👋</h1>
+          <p className="ps">Your personalised learning overview · <span className="mono" style={{color:"var(--v1)",fontWeight:700}}>{xp} XP</span> · Level {lv.level} {LEVEL_NAMES[lv.level]}</p>
+        </div>
+        <div style={{display:"flex",gap:10}}>
+          <button className="btn btn-out btn-sm" onClick={()=>go("leaderboard")}>🏆 Leaderboard</button>
+          <button className="btn btn-v" onClick={()=>go("quiz")}>⚡ Take a Quiz</button>
+        </div>
+      </div>
+      {!apiKey&&<div className="tipbox mb6" style={{background:"rgba(99,102,241,.08)",borderColor:"rgba(99,102,241,.3)"}}>
+        <span style={{fontSize:20}}>🔑</span>
+        <div><strong style={{color:"var(--v1)"}}>Setup your Groq API Key</strong> to unlock AI Chat, Quiz Generator, Study Plan & Weakness Analysis. <span style={{color:"var(--v1)",cursor:"pointer",fontWeight:700,textDecoration:"underline"}} onClick={()=>go("settings")}>Add it now →</span></div>
+      </div>}
+      <div className="sgrid mb6">
+        {[{n:totalQ,l:"Quizzes Taken",e:"📝",i:0,delta:totalQ>0?"↑ Keep going!":"Start now",up:true},{n:avg?avg+"%":"—",l:"Average Score",e:"🎯",i:1,delta:avg>=60?"↑ Above pass":"Improve!",up:avg>=60},{n:best?best+"%":"—",l:"Best Score",e:"🏆",i:2,delta:"Personal best",up:true},{n:<><span className="streak-fire">🔥</span>{streak}d</>,l:"Day Streak",e:"",i:3,delta:streak>0?"↑ On a roll!":"Start today",up:streak>0}].map((s,i)=>(
+          <div className="scard fu" key={i} style={{animationDelay:`${i*.07}s`}}><div className="scard-stripe" style={{background:STRIPE[i]}}/><div className="scard-emoji">{s.e}</div><div className="scard-num">{s.n}</div><div className="scard-label">{s.l}</div><div className={`scard-delta ${s.up?"dup":"ddn"}`}>{s.delta}</div></div>
+        ))}
+      </div>
+      <div className="g2 mb4">
+        <div className="card"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">Score Trend</div><div className="card-sub">Last {Math.min(hist.length,10)} quizzes</div></div><span className="tag tp">Live</span></div>
+          {hist.length===0?<div className="empty" style={{padding:"30px 0"}}><div className="empty-ico">📊</div><h3>No quiz data yet</h3><p>Take your first quiz!</p></div>:<div className="chart-box"><canvas ref={chartRef}/></div>}
+        </div>
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Quick Actions</div></div>
+          {[{i:"💬",l:"AI Tutor Chat",s:"Ask any concept doubt",p:"chat",c:"#6366F1"},{i:"⚡",l:"Generate Quiz",s:"AI quiz targeting your gaps",p:"quiz",c:"#A855F7"},{i:"📅",l:"Study Plan",s:"Your AI day-wise schedule",p:"plan",c:"#EC4899"},{i:"🃏",l:"Flashcards",s:"Active recall practice",p:"flashcards",c:"#06B6D4"},{i:"🎯",l:"Weakness Analysis",s:"Deep AI-powered insights",p:"weakness",c:"#10B981"}].map((a,i)=>(
+            <div key={i} onClick={()=>go(a.p)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px",borderRadius:12,cursor:"pointer",marginBottom:6,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background="var(--bg2)";e.currentTarget.style.transform="translateX(4px)"}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.transform="none"}}>
+              <div style={{width:38,height:38,borderRadius:11,background:`${a.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,border:`1px solid ${a.c}30`}}>{a.i}</div>
+              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{a.l}</div><div style={{fontSize:11.5,color:"var(--tx3)"}}>{a.s}</div></div>
+              <span style={{color:"var(--tx3)",fontSize:16,fontWeight:700}}>›</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="g2 mb4">
+        <div className="card"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">{subj.i} {subj.l} Performance</div><div className="card-sub">Based on quiz results</div></div><button className="btn btn-ghost btn-sm" onClick={()=>go("weakness")}>Full Analysis →</button></div>
+          {topicStats.length===0?<div className="empty" style={{padding:"20px 0"}}><div className="empty-ico" style={{fontSize:32}}>📚</div><h3 style={{fontSize:13}}>No topic data yet</h3><p style={{fontSize:11.5}}>Take topic quizzes</p></div>:topicStats.map(t=>(<div className="pb-wrap" key={t.t}><div className="pb-head"><span>{t.t}</span><span className="mono fw9" style={{color:t.s>=70?"#10B981":t.s>=50?"#F59E0B":"#F43F5E"}}>{t.s}%</span></div><div className="pb-track"><div className={`pb-fill ${t.s>=70?"pb-s":t.s>=50?"pb-m":"pb-w"}`} style={{width:t.s+"%"}}/></div></div>))}
+        </div>
+        <div className="card"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">Level Progress</div><div className="card-sub">Lv.{lv.level} — {LEVEL_NAMES[lv.level]}</div></div><span className="tag tp">{xp} XP</span></div>
+          <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:18}}>
+            <div className="ring-wrap">
+              <svg className="ring-svg" width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--br)" strokeWidth="7"/><circle cx="40" cy="40" r="32" fill="none" strokeWidth="7" stroke="url(#lvgrad)" strokeLinecap="round" strokeDasharray={`${2*Math.PI*32*pct(lv.current,lv.needed)/100} ${2*Math.PI*32}`}/><defs><linearGradient id="lvgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#6366F1"/><stop offset="100%" stopColor="#EC4899"/></linearGradient></defs></svg>
+              <div className="ring-lbl"><span style={{fontSize:15,fontWeight:900,color:"var(--tx)"}}>{lv.level}</span></div>
+            </div>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{lv.current}/{lv.needed} XP to next level</div>
+              <div style={{fontSize:12,color:"var(--tx3)",marginTop:4}}>{lv.next?`${lv.next} XP needed total`:"Max level reached! 🎉"}</div>
+              <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
+                {unlockedBadges.slice(0,4).map(b=><span key={b.id} className="badge-icon" data-tip={b.name} title={b.name} style={{fontSize:20,cursor:"default"}}>{b.icon}</span>)}
+                {unlockedBadges.length>4&&<span style={{fontSize:12,color:"var(--v1)",fontWeight:700}}>+{unlockedBadges.length-4} more</span>}
+              </div>
+            </div>
+          </div>
+          <button className="btn btn-out w100 btn-sm" onClick={()=>go("profile")}>View All Badges →</button>
+        </div>
+      </div>
+      <div className="card mt4"><div className="card-glow"/>
+        <div className="card-hd"><div className="card-title">Recent Quizzes</div><button className="btn btn-ghost btn-sm" onClick={()=>go("progress")}>View All →</button></div>
+        {hist.length===0?<div className="empty"><div className="empty-ico">📝</div><h3>No quizzes yet</h3><p>Your results will appear here</p></div>:(
+          <div style={{overflowX:"auto"}}><table className="dtbl"><thead><tr><th>#</th><th>Topic</th><th>Subject</th><th>Score</th><th>Diff</th><th>XP</th><th>Date</th></tr></thead>
+          <tbody>{[...hist].reverse().slice(0,5).map((q,i)=>(<tr key={i}><td className="mono txm">{hist.length-i}</td><td style={{fontWeight:700,color:"var(--tx)"}}>{q.topic}</td><td><span className="tag tc">{SUBJECTS.find(s=>s.id===q.subject)?.i}</span></td><td><span style={{fontWeight:900,fontFamily:"var(--mono)",color:q.score>=70?"#10B981":q.score>=50?"#F59E0B":"#F43F5E"}}>{q.score}%</span></td><td><span className={`tag ${q.diff==="easy"?"tg":q.diff==="hard"?"tr":"ta"}`}>{q.diff}</span></td><td className="mono" style={{color:"var(--v8)",fontWeight:700}}>+{q.xp||50}</td><td className="mono txm" style={{fontSize:11}}>{ds(q.date)}</td></tr>))}</tbody>
+          </table></div>
+        )}
+      </div>
+    </div></div>
+  );
+}
+
+/* ══ CHAT ══ */
+function Chat({user,apiKey,go}){
+  const uid=user.id;
+  const subj=SUBJECTS.find(s=>s.id===user.subject)||SUBJECTS[0];
+  const [msgs,setMsgs]=useState(LS.g(`chat_${uid}`,[{role:"assistant",content:`Hey **${user.name.split(" ")[0]}**! 👋 I'm your **EduSense AI tutor**.\n\nI can explain any concept in **${subj.l}** — or any subject!\n\nWhat would you like to learn today? 🚀`,time:timeStamp()}]));
+  const [inp,setInp]=useState("");
+  const [loading,setL]=useState(false);
+  const [selSubj,setSS]=useState(user.subject||"cs");
+  const botRef=useRef();const taRef=useRef();
+  useEffect(()=>{LS.s(`chat_${uid}`,msgs.slice(-60));LS.s(`chat_count_${uid}`,msgs.filter(m=>m.role==="user").length)},[msgs]);
+  useEffect(()=>{botRef.current?.scrollIntoView({behavior:"smooth"})},[msgs,loading]);
+  const fmt=(txt)=>{
+    if(!txt)return"";
+    return txt.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/`([^`]+)`/g,"<code>$1</code>").replace(/^### (.+)$/gm,"<h4>$1</h4>").replace(/^## (.+)$/gm,"<h3>$1</h3>").replace(/^- (.+)$/gm,"<li>$1</li>").replace(/(<li>.+<\/li>)/gs,"<ul>$1</ul>").replace(/\n\n/g,"</p><p>").replace(/\n/g,"<br/>");
+  };
+  const send=async()=>{
+    if(!inp.trim()||loading)return;
+    if(!apiKey){alert("Add your Groq API key in Settings!");return}
+    const um={role:"user",content:inp.trim(),time:timeStamp()};
+    setMsgs(m=>[...m,um]);setInp("");setL(true);
+    if(taRef.current)taRef.current.style.height="46px";
+    try{
+      const history=[...msgs,um].slice(-12).map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));
+      const reply=await groq(apiKey,history,SYS_TUTOR(user.name,SUBJECTS.find(s=>s.id===selSubj)?.l||"Computer Science"));
+      setMsgs(m=>[...m,{role:"assistant",content:reply,time:timeStamp()}]);
+    }catch(e){setMsgs(m=>[...m,{role:"assistant",content:`⚠️ **Error:** ${e.message}\n\nPlease check your API key in Settings.`,time:""}])}
+    setL(false);
+  };
+  const suggs=["Explain recursion with a real example","What is Big O notation?","How does gradient descent work?","Explain polymorphism in OOP","What are the laws of thermodynamics?","How does SQL JOIN work?"];
+  return(
+    <div className="chat-wrap">
+      <div className="topbar">
+        <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--tx)"}}>AI Tutor <span className="txv">Chat</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:12,fontWeight:700,color:"var(--tx3)"}}>Subject:</span>
+          <select className="inp" style={{width:160,padding:"6px 30px 6px 10px",fontSize:12,borderRadius:10}} value={selSubj} onChange={e=>setSS(e.target.value)}>{SUBJECTS.map(s=><option key={s.id} value={s.id}>{s.i} {s.l}</option>)}</select>
+          <button className="btn-icon" onClick={()=>{setMsgs([]);LS.s(`chat_${uid}`,[])}} title="Clear chat">🗑</button>
+        </div>
+      </div>
+      <div className="chat-msgs">
+        {msgs.map((m,i)=>(
+          <div key={i} className={`msg${m.role==="user"?" me":""} fu`}>
+            <div className={`msg-av ${m.role==="assistant"?"ai":"me"}`}>{m.role==="assistant"?"🧠":user?.avatar?<img src={user.avatar} alt="" onError={e=>{e.target.style.display="none"}}/>:ini(user.name)}</div>
+            <div><div className={`bbl ${m.role==="assistant"?"ai":"me"}`} dangerouslySetInnerHTML={{__html:fmt(m.content)}}/>{m.time&&<div className="msg-t">{m.time}</div>}</div>
+          </div>
+        ))}
+        {loading&&<div className="msg"><div className="msg-av ai">🧠</div><div className="bbl ai"><div className="typing"><span/><span/><span/></div></div></div>}
+        <div ref={botRef}/>
+      </div>
+      {msgs.length<=1&&<div className="chips">{suggs.map((s,i)=><div key={i} className="chip" onClick={()=>{setInp(s);taRef.current?.focus()}}>{s}</div>)}</div>}
+      <div className="chat-foot">
+        <div className="chat-row">
+          <textarea ref={taRef} className="chat-ta" placeholder="Ask any academic question… (Enter to send)" value={inp} rows={1}
+            onChange={e=>{setInp(e.target.value);e.target.style.height="46px";e.target.style.height=Math.min(e.target.scrollHeight,150)+"px"}}
+            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}}/>
+          <button className="chat-send" onClick={send} disabled={loading||!inp.trim()}>{loading?<span className="spin" style={{width:18,height:18}}/>:"↑"}</button>
+        </div>
+        <div style={{fontSize:10.5,color:"var(--tx3)",marginTop:5,textAlign:"center"}}>EduSense AI · Groq Llama 3.3 70B · Educational use only</div>
+      </div>
+    </div>
+  );
+}
+
+/* ══ QUIZ ══ */
+function Quiz({user,apiKey,go}){
+  const uid=user.id;
+  const [phase,setPhase]=useState("setup");
+  const [subj,setSubj]=useState(user.subject||"cs");
+  const [topic,setTopic]=useState("");
+  const [diff,setDiff]=useState("medium");
+  const [numQ,setNumQ]=useState(5);
+  const [questions,setQ]=useState([]);
+  const [cur,setCur]=useState(0);
+  const [sel,setSel]=useState(null);
+  const [ans,setAns]=useState([]);
+  const [showEx,setShowEx]=useState(false);
+  const [notif,setNotif]=useState(null);
+  const [timeLeft,setTimeLeft]=useState(null);
+  const [timerActive,setTimerActive]=useState(false);
+  const [showConfetti,setShowConfetti]=useState(false);
+  const timerRef=useRef();
+  const sObj=SUBJECTS.find(s=>s.id===subj)||SUBJECTS[0];
+  const QLIMIT={easy:90,medium:60,hard:45};
+
+  useEffect(()=>{
+    if(timerActive&&timeLeft>0){timerRef.current=setTimeout(()=>setTimeLeft(t=>t-1),1000);}
+    else if(timerActive&&timeLeft===0){pick("__timeout__");}
+    return()=>clearTimeout(timerRef.current);
+  },[timerActive,timeLeft]);
+
+  const generate=async()=>{
+    if(!apiKey){alert("Add Groq API key in Settings!");return}
+    setPhase("loading");
+    const weak=LS.g(`qh_${uid}`,[]).filter(q=>q.score<65).map(q=>q.topic).join(", ");
+    const prompt=`Generate ${numQ} ${diff} difficulty questions on "${topic||sObj.topics[0]}" in ${sObj.l}.${weak?` Student weak in: ${weak}.`:""}`;
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:prompt}],SYS_QUIZ,900*numQ/5+300);
+      const parsed=JSON.parse(raw.replace(/```json?|```/g,"").trim());
+      if(!parsed.questions?.length)throw new Error("Invalid format");
+      setQ(parsed.questions.slice(0,numQ));setCur(0);setAns([]);setSel(null);setShowEx(false);
+      setTimeLeft(QLIMIT[diff]);setTimerActive(true);
+      setPhase("quiz");
+    }catch(e){setNotif({msg:"Quiz generation failed: "+e.message,type:"error"});setPhase("setup")}
+  };
+  const pick=(opt)=>{
+    if(sel)return;
+    clearTimeout(timerRef.current);setTimerActive(false);
+    setSel(opt);setShowEx(true);
+    const ok=opt===questions[cur].correct&&opt!=="__timeout__";
+    setAns(a=>[...a,{q:cur,chosen:opt,ok,time:QLIMIT[diff]-(timeLeft||0)}]);
+  };
+  const next=()=>{
+    if(cur<questions.length-1){
+      setCur(c=>c+1);setSel(null);setShowEx(false);
+      setTimeLeft(QLIMIT[diff]);setTimerActive(true);
+    }else{
+      setTimerActive(false);
+      const correct=ans.filter(a=>a.ok).length;
+      const score=Math.round(correct/questions.length*100);
+      const xpEarned=Math.round(XP_PER_QUIZ+(correct*XP_PER_CORRECT)+(score>=80?25:0));
+      const h=LS.g(`qh_${uid}`,[]);
+      LS.s(`qh_${uid}`,[...h,{topic:topic||sObj.topics[0],subject:subj,score,diff,date:new Date().toISOString(),correct,total:questions.length,xp:xpEarned}]);
+      // XP update
+      LS.s(`xp_${uid}`,(LS.g(`xp_${uid}`,0))+xpEarned);
+      // Streak update (fixed - only once per day)
+      updateStreak(uid);
+      if(score>=80)setShowConfetti(true);
+      setPhase("result");
+    }
+  };
+  const q=questions[cur];
+  const fPct=questions.length?Math.round(ans.filter(a=>a.ok).length/questions.length*100):0;
+  const xpEarned=Math.round(XP_PER_QUIZ+(ans.filter(a=>a.ok).length*XP_PER_CORRECT)+(fPct>=80?25:0));
+  const rd=fPct>=80?{e:"🏆",l:"Excellent!",c:"#10B981"}:fPct>=60?{e:"👍",l:"Good Job!",c:"#F59E0B"}:{e:"📖",l:"Keep Studying",c:"#F43F5E"};
+  const timerColor=timeLeft>20?"normal":timeLeft>10?"warn":"danger";
+
+  if(phase==="setup")return(
+    <div className="scrollpage"><TopBar title="Quiz Generator ⚡" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu">
+      {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+      <div className="g2">
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Configure Your Quiz</div></div>
+          <div className="field"><label className="lbl">Subject</label><div style={{display:"flex",flexWrap:"wrap",gap:7}}>{SUBJECTS.map(s=><div key={s.id} className={`schip${subj===s.id?" on":""}`} onClick={()=>{setSubj(s.id);setTopic("")}}>{s.i} {s.l}</div>)}</div></div>
+          <div className="field"><label className="lbl">Difficulty</label><div style={{display:"flex",gap:8}}>{["easy","medium","hard"].map(d=><div key={d} className={`schip${diff===d?" on":""}`} onClick={()=>setDiff(d)} style={{flex:1,justifyContent:"center"}}>{d==="easy"?"🟢":d==="medium"?"🟡":"🔴"} {d.charAt(0).toUpperCase()+d.slice(1)}</div>)}</div></div>
+          <div className="field"><label className="lbl">Number of Questions: <strong>{numQ}</strong></label><input type="range" min="3" max="15" value={numQ} onChange={e=>setNumQ(+e.target.value)} style={{width:"100%",marginTop:8}}/><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--tx3)",marginTop:4}}><span>3</span><span>15</span></div></div>
+          <div className="field"><label className="lbl">Topic (optional)</label><input className="inp" placeholder={`e.g. ${sObj.topics[0]}`} value={topic} onChange={e=>setTopic(e.target.value)}/></div>
+          <div style={{padding:"12px 14px",background:"var(--bg2)",borderRadius:11,border:"1px solid var(--br)",fontSize:12.5,color:"var(--tx2)",marginBottom:16}}>⏱️ <strong>Timed Mode:</strong> {QLIMIT[diff]}s per question · Score more = more XP!</div>
+          <button className="btn btn-v w100 btn-lg" onClick={generate}>Generate {numQ}-Question Quiz ✨</button>
+        </div>
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">{sObj.i} Quick Topics</div></div>
+          {sObj.topics.map(t=><div key={t} onClick={()=>setTopic(t)} style={{padding:"10px 13px",borderRadius:11,cursor:"pointer",background:topic===t?"rgba(99,102,241,.1)":"var(--bg2)",border:`2px solid ${topic===t?"var(--v1)":"transparent"}`,color:topic===t?"var(--v1)":"var(--tx2)",fontWeight:topic===t?700:500,fontSize:13.5,transition:"all .2s",display:"flex",alignItems:"center",gap:8,marginBottom:6}}><span>{topic===t?"🎯":"▸"}</span>{t}{topic===t&&<span style={{marginLeft:"auto",fontSize:10.5,fontWeight:800,color:"var(--v1)"}}>SELECTED</span>}</div>)}
+        </div>
+      </div>
+    </div></div>
+  );
+  if(phase==="loading")return(<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",gap:16}}><div style={{fontSize:56,animation:"spinr 2s linear infinite"}}>🧠</div><h2 style={{fontSize:22,fontWeight:900,background:"var(--grad)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Generating your quiz…</h2><p style={{color:"var(--tx3)"}}>AI crafting {numQ} smart questions on <strong>{topic||sObj.topics[0]}</strong></p></div>);
+  if(phase==="result")return(
+    <div className="scrollpage">
+      {showConfetti&&<div className="confetti-pop">🎉</div>}
+      <TopBar title="Quiz Results" user={user} apiKey={apiKey} go={go}/>
+      <div className="ppad fu" style={{maxWidth:580}}>
+        <div className="card mb4" style={{textAlign:"center",padding:"32px",background:`linear-gradient(135deg,${rd.c}18,${rd.c}08)`,border:`2px solid ${rd.c}40`}}>
+          <div style={{fontSize:52}} className="pop">{rd.e}</div>
+          <h2 style={{fontSize:26,fontWeight:900,marginTop:12,color:rd.c}}>{rd.l}</h2>
+          <div style={{fontSize:48,fontWeight:900,color:"var(--tx)",margin:"8px 0",letterSpacing:"-2px"}}>{fPct}%</div>
+          <div style={{fontSize:13.5,color:"var(--tx2)"}}>{ans.filter(a=>a.ok).length} of {questions.length} correct</div>
+          <div style={{marginTop:14,display:"inline-flex",alignItems:"center",gap:7,padding:"7px 18px",background:"rgba(99,102,241,.12)",borderRadius:99,border:"1px solid rgba(99,102,241,.25)"}}>
+            <span style={{fontSize:15}}>⚡</span><span style={{fontWeight:800,color:"var(--v1)",fontSize:14}}>+{xpEarned} XP earned!</span>
+          </div>
+        </div>
+        <div className="card mb4"><div className="card-glow"/>
+          <div className="card-title mb3">Question Review</div>
+          {questions.map((question,i)=>{
+            const a=ans[i];const ok=a?.ok;
+            return(<div key={i} style={{padding:"13px",borderRadius:12,background:ok?"rgba(16,185,129,.06)":"rgba(244,63,94,.06)",border:`1.5px solid ${ok?"rgba(16,185,129,.25)":"rgba(244,63,94,.25)"}`,marginBottom:10}}>
+              <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"flex-start"}}>
+                <span style={{fontSize:15,marginTop:1}}>{ok?"✅":"❌"}</span>
+                <div style={{flex:1,fontSize:13.5,fontWeight:600,color:"var(--tx)"}}>{i+1}. {question.q}</div>
+              </div>
+              <div style={{fontSize:12.5,color:"var(--tx3)",marginLeft:23}}>
+                {!ok&&a?.chosen!=="__timeout__"&&<div style={{color:"#F43F5E",marginBottom:4}}>Your: {a?.chosen||"—"}</div>}
+                {a?.chosen==="__timeout__"&&<div style={{color:"#F59E0B",marginBottom:4}}>⏰ Time's up!</div>}
+                <div style={{color:"#10B981"}}>Correct: {question.correct}</div>
+                {question.explanation&&<div style={{marginTop:6,color:"var(--tx2)",fontStyle:"italic"}}>💡 {question.explanation}</div>}
+              </div>
+            </div>);
+          })}
+        </div>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button className="btn btn-v" style={{flex:1}} onClick={()=>{setPhase("setup");setQ([]);setAns([]);setSel(null)}}>🔄 Try Again</button>
+          <button className="btn btn-out" style={{flex:1}} onClick={()=>go("progress")}>📊 View Progress</button>
+          <button className="btn btn-out" style={{flex:1}} onClick={()=>go("dashboard")}>🏠 Dashboard</button>
+        </div>
+      </div>
+    </div>
+  );
+  return(
+    <div className="scrollpage">
+      <TopBar title={`Quiz — Q${cur+1}/${questions.length}`} user={user} apiKey={apiKey} go={go}>
+        <div className={`qtimer ${timerColor}`}>⏱️ {timeLeft}s</div>
+      </TopBar>
+      <div className="ppad fu" style={{maxWidth:640}}>
+        <div className="qpbar"><div className="qpfill" style={{width:`${pct(cur,questions.length)}%`}}/></div>
+        {q&&<div className="card"><div className="card-glow"/>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <span className={`tag ${diff==="easy"?"tg":diff==="hard"?"tr":"ta"}`}>{diff}</span>
+            <span style={{fontSize:12.5,color:"var(--tx3)",fontWeight:600}}>{topic||sObj.topics[0]} · {sObj.i}</span>
+          </div>
+          <h3 style={{fontSize:16,fontWeight:800,color:"var(--tx)",lineHeight:1.55,marginBottom:22}}>{q.q}</h3>
+          {q.options.map((opt,i)=>{
+            const letters=["A","B","C","D"];
+            let cls="qopt"+(sel?` locked`:"")+
+              (sel===opt&&opt===q.correct?" right":"")+
+              (sel===opt&&opt!==q.correct?" wrong":"")+
+              (sel&&sel!==q.correct&&opt===q.correct?" show-right":"");
+            return(<div key={i} className={cls} onClick={()=>pick(opt)}>
+              <div className="opt-let">{letters[i]}</div>{opt}
+              {sel&&opt===q.correct&&<span style={{marginLeft:"auto",fontSize:14}}>✓</span>}
+              {sel===opt&&opt!==q.correct&&<span style={{marginLeft:"auto",fontSize:14}}>✗</span>}
+            </div>);
+          })}
+          {showEx&&q.explanation&&<div className="expl"><strong>💡 Explanation:</strong> {q.explanation}</div>}
+          {sel&&<button className="btn btn-v w100 mt4" onClick={next}>{cur<questions.length-1?"Next Question →":"Finish Quiz 🎯"}</button>}
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+/* ══ STUDY PLAN ══ */
+function Plan({user,apiKey,go}){
+  const uid=user.id;
+  const [plan,setPlan]=useState(LS.g(`plan_${uid}`,null));
+  const [loading,setL]=useState(false);
+  const [subj,setSubj]=useState(user.subject||"cs");
+  const [days,setDays]=useState(7);
+  const [prog,setProg]=useState(LS.g(`pp_${uid}`,{}));
+  const [open,setOpen]=useState({0:true});
+  const [notif,setNotif]=useState(null);
+  const sObj=SUBJECTS.find(s=>s.id===subj)||SUBJECTS[0];
+  const weak=LS.g(`qh_${uid}`,[]).filter(q=>q.score<65).map(q=>q.topic).filter((v,i,a)=>a.indexOf(v)===i).join(", ")||"core topics";
+  const totalT=plan?.days?.reduce((a,d)=>a+d.topics.length,0)||0;
+  const doneT=Object.values(prog).filter(Boolean).length;
+  const typeStyle={concept:{c:"tb",i:"📖"},practice:{c:"tg",i:"✏️"},revision:{c:"ta",i:"🔄"},"mock-test":{c:"tr",i:"🧪"}};
+  const generate=async()=>{
+    if(!apiKey){alert("Add API key in Settings!");return}
+    setL(true);
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:`Create ${days}-day study plan for ${sObj.l}. Weak areas: ${weak}. Date: ${new Date().toDateString()}`}],SYS_PLAN(days,weak),2000);
+      const parsed=JSON.parse(raw.replace(/```json?|```/g,"").trim());
+      LS.s(`plan_${uid}`,parsed);setPlan(parsed);
+      const np={};setProg(np);LS.s(`pp_${uid}`,np);setOpen({0:true});
+      setNotif({msg:"Study plan created! 🎉",type:"success"});
+    }catch(e){setNotif({msg:"Failed: "+e.message,type:"error"})}
+    setL(false);
+  };
+  const toggle=(di,ti)=>{const k=`${di}_${ti}`;const u={...prog,[k]:!prog[k]};setProg(u);LS.s(`pp_${uid}`,u)};
+  return(
+    <div className="scrollpage">
+      <TopBar title="Study Plan 📅" user={user} apiKey={apiKey} go={go}><button className="btn btn-v" onClick={generate} disabled={loading}>{loading?<span className="spin" style={{width:16,height:16}}/>:"✨"} {plan?"Regenerate":"Generate Plan"}</button></TopBar>
+      <div className="ppad fu">
+        {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+        {!plan&&!loading&&(
+          <div className="g2 mb4">
+            <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Configure Plan</div></div>
+              <div className="field"><label className="lbl">Subject</label><div style={{display:"flex",flexWrap:"wrap",gap:7}}>{SUBJECTS.map(s=><div key={s.id} className={`schip${subj===s.id?" on":""}`} onClick={()=>setSubj(s.id)} style={{fontSize:12,padding:"6px 12px"}}>{s.i} {s.l}</div>)}</div></div>
+              <div className="field"><label className="lbl">Duration: <strong>{days} days</strong></label><input type="range" min="3" max="30" value={days} onChange={e=>setDays(+e.target.value)} style={{width:"100%",marginTop:8}}/><div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--tx3)",marginTop:4}}><span>3 days</span><span>30 days</span></div></div>
+              {weak!=="core topics"&&<div className="tipbox mb4"><span>🎯</span><span>AI will focus on: <strong>{weak}</strong></span></div>}
+              <button className="btn btn-v w100 btn-lg" onClick={generate}>🚀 Create My Study Plan</button>
+            </div>
+            <div className="card" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,minHeight:280}}><div style={{fontSize:48}}>📅</div><div style={{fontSize:16,fontWeight:800,color:"var(--tx)"}}>No plan yet</div><div style={{fontSize:12.5,color:"var(--tx3)",textAlign:"center",maxWidth:220}}>Configure and let AI build a personalised schedule</div></div>
+          </div>
+        )}
+        {loading&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"50vh",gap:16}}><div style={{fontSize:48,animation:"spinr 2s linear infinite"}}>📅</div><h2 style={{fontSize:20,fontWeight:900,background:"var(--grad)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Building your plan…</h2><p style={{color:"var(--tx3)"}}>AI crafting a personalised {days}-day schedule</p></div>}
+        {plan&&!loading&&(<>
+          <div className="card mb4" style={{background:"linear-gradient(135deg,#0A0520,#1a0a3e,#6366F1)",border:"none",color:"#fff",padding:"22px 26px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:14}}>
+              <div><h2 style={{fontSize:19,fontWeight:900,marginBottom:5,letterSpacing:"-.3px"}}>{plan.title}</h2><p style={{fontSize:12.5,opacity:.75,lineHeight:1.6,maxWidth:500}}>{plan.overview?.slice(0,120)}…</p><div style={{marginTop:9,display:"flex",gap:12,flexWrap:"wrap"}}>{[`📅 ${plan.duration} days`,`📚 ${totalT} topics`,`✅ ${doneT} done`].map((t,i)=><span key={i} style={{fontSize:12,opacity:.75,fontWeight:600}}>{t}</span>)}</div></div>
+              <div style={{textAlign:"center"}}><div style={{fontSize:36,fontWeight:900}}>{pct(doneT,totalT)}%</div><div style={{fontSize:12,opacity:.7}}>Complete</div><div style={{marginTop:7,width:100,height:6,background:"rgba(255,255,255,.2)",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:pct(doneT,totalT)+"%",background:"linear-gradient(90deg,#A78BFA,#EC4899)",borderRadius:99,transition:"width .5s"}}/></div></div>
+            </div>
+          </div>
+          {plan.days?.map((day,di)=>{
+            const dc=day.topics.filter((_,ti)=>prog[`${di}_${ti}`]).length;const isOpen=open[di];
+            return(<div className="daycard" key={di}>
+              <div className="dayhd" onClick={()=>setOpen(o=>({...o,[di]:!o[di]}))}>
+                <div className="daynum">{day.day}</div>
+                <div style={{flex:1}}><div style={{fontSize:13.5,fontWeight:700,color:"var(--tx)"}}>{day.goal}</div>{day.tip&&<div style={{fontSize:11.5,color:"var(--tx3)",marginTop:2}}>💡 {day.tip}</div>}</div>
+                <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}><span className="mono" style={{fontSize:11.5,color:"var(--tx3)"}}>{dc}/{day.topics.length}</span>{dc===day.topics.length&&day.topics.length>0&&<span className="tag tp">Done ✓</span>}<span style={{color:"var(--tx3)",fontSize:16,transition:"transform .2s",transform:isOpen?"rotate(90deg)":"none"}}>›</span></div>
+              </div>
+              {isOpen&&<div className="daybody">{day.topics.map((t,ti)=>{const ts2=typeStyle[t.type]||typeStyle.concept;const done=!!prog[`${di}_${ti}`];return(<div className="toprow" key={ti}><div className={`chk${done?" dn":""}`} onClick={()=>toggle(di,ti)}>{done&&<span style={{color:"#fff",fontSize:10,fontWeight:900}}>✓</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:600,color:"var(--tx)",textDecoration:done?"line-through":"none",opacity:done?.6:1}}>{t.name}</div>{t.notes&&<div style={{fontSize:11,color:"var(--tx3)",marginTop:2}}>{t.notes}</div>}</div><span className={`tag ${ts2.c}`}>{ts2.i} {t.type}</span><span className="mono txm" style={{fontSize:11,marginLeft:6}}>{t.duration}</span></div>)})}</div>}
+            </div>);
+          })}
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+/* ══ FLASHCARDS ══ */
+function Flashcards({user,apiKey,go}){
+  const uid=user.id;
+  const [cards,setCards]=useState(LS.g(`flash_${uid}`,[])  );
+  const [loading,setL]=useState(false);
+  const [subj,setSubj]=useState(user.subject||"cs");
+  const [topic,setTopic]=useState("");
+  const [cur,setCur]=useState(0);
+  const [flipped,setFlipped]=useState(false);
+  const [known,setKnown]=useState({});
+  const [phase,setPhase]=useState(cards.length>0?"study":"setup");
+  const [notif,setNotif]=useState(null);
+  const sObj=SUBJECTS.find(s=>s.id===subj)||SUBJECTS[0];
+  const generate=async()=>{
+    if(!apiKey){alert("Add API key in Settings!");return}
+    setL(true);
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:`Generate 10 flashcards for "${topic||sObj.topics[0]}" in ${sObj.l}.`}],SYS_FLASH,600);
+      const parsed=JSON.parse(raw.replace(/```json?|```/g,"").trim());
+      setCards(parsed.cards);LS.s(`flash_${uid}`,parsed.cards);
+      setCur(0);setFlipped(false);setKnown({});setPhase("study");
+    }catch(e){setNotif({msg:"Failed: "+e.message,type:"error"})}
+    setL(false);
+  };
+  const mark=(k)=>{setKnown(v=>({...v,[cur]:k}));if(cur<cards.length-1){setCur(c=>c+1);setFlipped(false);}else setPhase("done")};
+  const knownCount=Object.values(known).filter(Boolean).length;
+  if(phase==="setup"||cards.length===0)return(
+    <div className="scrollpage"><TopBar title="Flashcards 🃏" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu" style={{maxWidth:580}}>
+      {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+      <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Generate Flashcards</div></div>
+        <div className="field"><label className="lbl">Subject</label><div style={{display:"flex",flexWrap:"wrap",gap:7}}>{SUBJECTS.map(s=><div key={s.id} className={`schip${subj===s.id?" on":""}`} onClick={()=>setSubj(s.id)}>{s.i} {s.l}</div>)}</div></div>
+        <div className="field"><label className="lbl">Topic</label><input className="inp" placeholder={`e.g. ${sObj.topics[0]}`} value={topic} onChange={e=>setTopic(e.target.value)}/></div>
+        <button className="btn btn-v w100 btn-lg" onClick={generate} disabled={loading}>{loading?<><span className="spin"/> Generating…</>:"🃏 Generate 10 Flashcards"}</button>
+      </div>
+    </div></div>
+  );
+  if(phase==="done")return(
+    <div className="scrollpage"><TopBar title="Flashcards 🃏" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu" style={{maxWidth:500,textAlign:"center"}}>
+      <div className="card" style={{padding:40}}>
+        <div style={{fontSize:52}}>🎉</div>
+        <h2 style={{fontSize:22,fontWeight:900,marginTop:14,color:"var(--tx)"}}>Session Complete!</h2>
+        <div style={{fontSize:16,color:"var(--tx2)",marginTop:8}}>{knownCount}/{cards.length} cards mastered</div>
+        <div style={{marginTop:24,display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+          <button className="btn btn-v" onClick={()=>{setCur(0);setFlipped(false);setKnown({});setPhase("study")}}>🔄 Study Again</button>
+          <button className="btn btn-out" onClick={()=>setPhase("setup")}>New Topic</button>
+        </div>
+      </div>
+    </div></div>
+  );
+  const c=cards[cur];
+  return(
+    <div className="scrollpage"><TopBar title="Flashcards 🃏" user={user} apiKey={apiKey} go={go}>
+      <div className="qtimer normal">{cur+1}/{cards.length}</div>
+    </TopBar>
+    <div className="ppad fu" style={{maxWidth:580}}>
+      <div className="qpbar"><div className="qpfill" style={{width:`${pct(cur,cards.length)}%`}}/></div>
+      <div className="flashcard" style={{minHeight:220}} onClick={()=>setFlipped(f=>!f)}>
+        <div className="fc-inner" style={{transform:flipped?"rotateY(180deg)":"none",transition:"transform .4s",transformStyle:"preserve-3d",position:"relative",minHeight:180,width:"100%"}}>
+          <div style={{backfaceVisibility:"hidden",WebkitBackfaceVisibility:"hidden",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,padding:"20px",minHeight:180}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--tx3)",textTransform:"uppercase",letterSpacing:".1em"}}>QUESTION</div>
+            <div style={{fontSize:17,fontWeight:700,color:"var(--tx)",textAlign:"center",lineHeight:1.5}}>{c.front}</div>
+            <div style={{fontSize:12,color:"var(--tx3)",marginTop:8}}>Tap to reveal answer</div>
+          </div>
+          <div style={{backfaceVisibility:"hidden",WebkitBackfaceVisibility:"hidden",transform:"rotateY(180deg)",position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,padding:"20px",background:"var(--grad-soft)",borderRadius:"var(--rad-xl)"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"var(--v1)",textTransform:"uppercase",letterSpacing:".1em"}}>ANSWER</div>
+            <div style={{fontSize:16,fontWeight:600,color:"var(--tx)",textAlign:"center",lineHeight:1.6}}>{c.back}</div>
+          </div>
+        </div>
+      </div>
+      {flipped&&<div style={{display:"flex",gap:12,marginTop:16}}>
+        <button className="btn btn-lg" style={{flex:1,background:"rgba(244,63,94,.12)",color:"#F43F5E",border:"2px solid rgba(244,63,94,.25)"}} onClick={()=>mark(false)}>❌ Still Learning</button>
+        <button className="btn btn-lg" style={{flex:1,background:"rgba(16,185,129,.12)",color:"#10B981",border:"2px solid rgba(16,185,129,.25)"}} onClick={()=>mark(true)}>✅ Got It!</button>
+      </div>}
+    </div></div>
+  );
+}
+
+/* ══ PROGRESS ══ */
+function Progress({user,go,apiKey}){
+  const uid=user.id;
+  const hist=LS.g(`qh_${uid}`,[]);
+  const br=useRef();const bi=useRef();const lr=useRef();const li=useRef();
+  const avg=hist.length?Math.round(hist.reduce((a,q)=>a+q.score,0)/hist.length):0;
+  const best=hist.length?Math.max(...hist.map(q=>q.score)):0;
+  const pass=hist.filter(q=>q.score>=60).length;
+  const passRate=hist.length?Math.round(pass/hist.length*100):0;
+  const totalXP=LS.g(`xp_${uid}`,0);
+  const bySubj={};hist.forEach(q=>{if(!bySubj[q.subject])bySubj[q.subject]=[];bySubj[q.subject].push(q.score)});
+  const sdata=Object.entries(bySubj).map(([id,sc])=>({id,l:SUBJECTS.find(s=>s.id===id)?.l||id,i:SUBJECTS.find(s=>s.id===id)?.i||"📚",avg:Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),count:sc.length}));
+  useEffect(()=>{
+    if(!br.current||hist.length===0)return;
+    if(bi.current){bi.current.destroy();bi.current=null}
+    const dk=document.documentElement.getAttribute("data-theme")==="dark";
+    const gc=dk?"rgba(255,255,255,.05)":"rgba(99,102,241,.06)";const tc=dk?"#5C5580":"#9B96B8";
+    const l10=hist.slice(-10);
+    bi.current=new Chart(br.current,{type:"bar",data:{labels:l10.map((_,i)=>`Q${i+1}`),datasets:[{data:l10.map(q=>q.score),backgroundColor:l10.map(q=>q.score>=70?"rgba(99,102,241,.8)":q.score>=50?"rgba(245,158,11,.8)":"rgba(244,63,94,.8)"),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gc},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11},callback:v=>v+"%"}},x:{grid:{display:false},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11}}}}}});
+    return()=>{if(bi.current){bi.current.destroy();bi.current=null}};
+  },[hist.length]);
+  useEffect(()=>{
+    if(!lr.current||hist.length<2)return;
+    if(li.current){li.current.destroy();li.current=null}
+    const dk=document.documentElement.getAttribute("data-theme")==="dark";
+    const gc=dk?"rgba(255,255,255,.05)":"rgba(99,102,241,.06)";const tc=dk?"#5C5580":"#9B96B8";
+    const scores=hist.map(q=>q.score);
+    const trend=scores.map((_,i)=>i===0?scores[0]:Math.round(scores.slice(0,i+1).reduce((a,b)=>a+b,0)/(i+1)));
+    li.current=new Chart(lr.current,{type:"line",data:{labels:hist.map((_,i)=>`Q${i+1}`),datasets:[{label:"Score",data:scores,borderColor:"#EC4899",backgroundColor:"transparent",tension:.4,pointRadius:3,borderWidth:2},{label:"Avg Trend",data:trend,borderColor:"#6366F1",backgroundColor:"transparent",tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[5,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:tc,font:{family:"Plus Jakarta Sans",size:11},boxWidth:20}}},scales:{y:{min:0,max:100,grid:{color:gc},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11},callback:v=>v+"%"}},x:{grid:{color:gc},ticks:{color:tc,font:{family:"Plus Jakarta Sans",size:11}}}}}});
+    return()=>{if(li.current){li.current.destroy();li.current=null}};
+  },[hist.length]);
+  const byDiff={easy:hist.filter(q=>q.diff==="easy"),medium:hist.filter(q=>q.diff==="medium"),hard:hist.filter(q=>q.diff==="hard")};
+  return(
+    <div className="scrollpage"><TopBar title="Progress 📊" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu">
+      <div className="sgrid mb6">
+        {[{n:hist.length,l:"Total Quizzes",e:"📝",i:0},{n:avg?avg+"%":"—",l:"Average Score",e:"🎯",i:1},{n:passRate+"%",l:"Pass Rate",e:"✅",i:2},{n:totalXP,l:"Total XP",e:"⚡",i:3}].map((s,idx)=>(
+          <div className="scard fu" key={s.i} style={{animationDelay:`${idx*.07}s`}}><div className="scard-stripe" style={{background:["linear-gradient(90deg,#6366F1,#A855F7)","linear-gradient(90deg,#06B6D4,#6366F1)","linear-gradient(90deg,#10B981,#06B6D4)","linear-gradient(90deg,#F59E0B,#EC4899)"][idx]}}/><div className="scard-emoji">{s.e}</div><div className="scard-num">{s.n}</div><div className="scard-label">{s.l}</div></div>
+        ))}
+      </div>
+      <div className="g2 mb4">
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Score Trend</div><div className="card-sub">All quiz scores</div></div>{hist.length<2?<div className="empty" style={{padding:"20px 0"}}><div className="empty-ico" style={{fontSize:30}}>📈</div><h3 style={{fontSize:13}}>Need 2+ quizzes</h3></div>:<div className="chart-box"><canvas ref={lr}/></div>}</div>
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Score Distribution</div><div className="card-sub">Last 10 quizzes</div></div>{hist.length===0?<div className="empty" style={{padding:"20px 0"}}><div className="empty-ico" style={{fontSize:30}}>📊</div><h3 style={{fontSize:13}}>No data yet</h3></div>:<div className="chart-box"><canvas ref={br}/></div>}</div>
+      </div>
+      <div className="g2 mb4">
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">By Difficulty</div></div>
+          {["easy","medium","hard"].map(d=>{const darr=byDiff[d];const davg=darr.length?Math.round(darr.reduce((a,q)=>a+q.score,0)/darr.length):null;return(<div key={d} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:"1px solid var(--br)"}}><span className={`tag ${d==="easy"?"tg":d==="hard"?"tr":"ta"}`}>{d==="easy"?"🟢":d==="medium"?"🟡":"🔴"} {d}</span><div style={{flex:1}}><span style={{fontSize:12,color:"var(--tx3)"}}>{darr.length} quizzes</span></div><strong style={{color:"var(--tx)",fontFamily:"var(--mono)"}}>{davg!==null?davg+"%":"—"}</strong></div>);})}
+        </div>
+        <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">By Subject</div></div>
+          {sdata.length===0?<div className="empty" style={{padding:"20px 0"}}><div className="empty-ico" style={{fontSize:30}}>📚</div><h3 style={{fontSize:13}}>No data yet</h3></div>:sdata.map(s=>(<div key={s.id} style={{display:"flex",alignItems:"center",gap:11,padding:"10px 0",borderBottom:"1px solid var(--br)"}}><span style={{fontSize:18}}>{s.i}</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{s.l}</div><div style={{fontSize:11,color:"var(--tx3)"}}>{s.count} quizzes</div></div><strong style={{fontFamily:"var(--mono)",color:s.avg>=70?"#10B981":s.avg>=50?"#F59E0B":"#F43F5E"}}>{s.avg}%</strong></div>))}
+        </div>
+      </div>
+      <div className="card"><div className="card-glow"/>
+        <div className="card-hd"><div className="card-title">Full Quiz History</div><span className="tag tp">{hist.length} total</span></div>
+        {hist.length===0?<div className="empty"><div className="empty-ico">📝</div><h3>No quizzes yet</h3><p>Take quizzes to build your history</p></div>:(
+          <div style={{overflowX:"auto"}}><table className="dtbl"><thead><tr><th>#</th><th>Topic</th><th>Subject</th><th>Score</th><th>Difficulty</th><th>Correct</th><th>XP</th><th>Date</th></tr></thead>
+          <tbody>{[...hist].reverse().map((q,i)=>(<tr key={i}><td className="mono txm">{hist.length-i}</td><td style={{fontWeight:700,color:"var(--tx)"}}>{q.topic}</td><td><span className="tag tc">{SUBJECTS.find(s=>s.id===q.subject)?.i} {SUBJECTS.find(s=>s.id===q.subject)?.l}</span></td><td><span style={{fontWeight:900,fontFamily:"var(--mono)",color:q.score>=70?"#10B981":q.score>=50?"#F59E0B":"#F43F5E"}}>{q.score}%</span></td><td><span className={`tag ${q.diff==="easy"?"tg":q.diff==="hard"?"tr":"ta"}`}>{q.diff}</span></td><td className="mono txm">{q.correct}/{q.total}</td><td className="mono" style={{color:"var(--v8)",fontWeight:700}}>+{q.xp||50}</td><td className="mono txm" style={{fontSize:11}}>{ds(q.date)}</td></tr>))}</tbody>
+          </table></div>
+        )}
+      </div>
+    </div></div>
+  );
+}
+
+/* ══ WEAKNESS ANALYSIS ══ */
+function Weakness({user,apiKey,go}){
+  const uid=user.id;
+  const hist=LS.g(`qh_${uid}`,[]);
+  const [analysis,setAnalysis]=useState(LS.g(`analysis_${uid}`,null));
+  const [loading,setL]=useState(false);
+  const [notif,setNotif]=useState(null);
+  const subj=SUBJECTS.find(s=>s.id===user.subject)||SUBJECTS[0];
+  const topicMap={};hist.forEach(q=>{if(!topicMap[q.topic])topicMap[q.topic]=[];topicMap[q.topic].push(q.score)});
+  const topicAvg=Object.entries(topicMap).map(([t,sc])=>({t,avg:Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),count:sc.length}));
+  const weak=topicAvg.filter(t=>t.avg<50).sort((a,b)=>a.avg-b.avg);
+  const med=topicAvg.filter(t=>t.avg>=50&&t.avg<70).sort((a,b)=>a.avg-b.avg);
+  const strong=topicAvg.filter(t=>t.avg>=70).sort((a,b)=>b.avg-a.avg);
+  const analyse=async()=>{
+    if(!apiKey){alert("Add API key in Settings!");return}
+    setL(true);
+    const summary={totalQuizzes:hist.length,avgScore:Math.round(hist.reduce((a,q)=>a+q.score,0)/(hist.length||1)),weakTopics:weak.map(t=>`${t.t}:${t.avg}%`).join(", "),strongTopics:strong.map(t=>`${t.t}:${t.avg}%`).join(", "),subject:subj.l,recentScores:hist.slice(-5).map(q=>`${q.topic}:${q.score}%`).join(", ")};
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:`Student data: ${JSON.stringify(summary)}`}],SYS_ANALYSIS,1200);
+      const parsed=JSON.parse(raw.replace(/```json?|```/g,"").trim());
+      setAnalysis(parsed);LS.s(`analysis_${uid}`,parsed);
+      setNotif({msg:"Analysis complete!",type:"success"});
+    }catch(e){setNotif({msg:"Analysis failed: "+e.message,type:"error"})}
+    setL(false);
+  };
+  return(
+    <div className="scrollpage"><TopBar title="Weakness Analysis 🎯" user={user} apiKey={apiKey} go={go}>
+      <button className="btn btn-v" onClick={analyse} disabled={loading||hist.length===0}>{loading?<><span className="spin" style={{width:16,height:16}}/> Analysing…</>:"🔬 Analyse Now"}</button>
+    </TopBar>
+    <div className="ppad fu">
+      {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+      {hist.length===0?(
+        <div className="empty" style={{paddingTop:80}}><div className="empty-ico" style={{fontSize:52}}>🎯</div><h3 style={{fontSize:17}}>No quiz data yet</h3><p style={{fontSize:14}}>Take some quizzes first to enable weakness analysis</p><button className="btn btn-v mt4" onClick={()=>go("quiz")}>⚡ Take a Quiz</button></div>
+      ):(
+        <>
+          <div className="g3 mb4">
+            {[{title:"🔴 Weak Areas",items:weak,c:"#F43F5E",pb:"pb-w"},{title:"🟡 Developing",items:med,c:"#F59E0B",pb:"pb-m"},{title:"🟢 Strong",items:strong,c:"#10B981",pb:"pb-s"}].map((col,i)=>(
+              <div className="card" key={i} style={{borderTop:`3px solid ${col.c}`}}><div className="card-glow"/>
+                <div style={{fontSize:13,fontWeight:800,color:col.c,marginBottom:12}}>{col.title} ({col.items.length})</div>
+                {col.items.length===0?<p style={{fontSize:12.5,color:"var(--tx3)"}}>{i===0?"None — great job!":i===1?"None":"Keep practising!"}</p>:col.items.map(t=>(<div className="pb-wrap" key={t.t}><div className="pb-head"><span style={{fontWeight:600,fontSize:12.5}}>{t.t}</span><span className="mono" style={{color:col.c,fontWeight:800,fontSize:11.5}}>{t.avg}%</span></div><div className="pb-track"><div className={`pb-fill ${col.pb}`} style={{width:t.avg+"%"}}/></div></div>))}
+              </div>
+            ))}
+          </div>
+          {analysis&&(
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card glow-card"><div className="card-glow"/>
+                <div style={{fontSize:13,fontWeight:800,color:"var(--v1)",marginBottom:9}}>🧠 AI Learning Summary</div>
+                <p style={{fontSize:14,color:"var(--tx)",lineHeight:1.8}}>{analysis.summary}</p>
+                {analysis.motivationTip&&<div style={{marginTop:12,padding:"11px 15px",background:"rgba(99,102,241,.08)",borderRadius:11,fontSize:13,color:"var(--v2)",fontStyle:"italic",border:"1px solid rgba(99,102,241,.15)"}}>✨ {analysis.motivationTip}</div>}
+                {analysis.estimatedImprovement&&<div style={{marginTop:10,padding:"10px 15px",background:"var(--grad)",borderRadius:10,color:"#fff",fontSize:13,fontWeight:700,boxShadow:"0 4px 15px rgba(99,102,241,.3)"}}>📈 {analysis.estimatedImprovement}</div>}
+                {analysis.weeklyGoal&&<div style={{marginTop:9,padding:"10px 15px",background:"var(--bg2)",borderRadius:10,color:"var(--tx2)",fontSize:13,border:"1px solid var(--br)"}}>🗓️ <strong>Weekly Goal:</strong> {analysis.weeklyGoal}</div>}
+                {analysis.studyStyle&&<div style={{marginTop:9,padding:"10px 15px",background:"rgba(16,185,129,.07)",borderRadius:10,color:"var(--tx2)",fontSize:13,border:"1px solid rgba(16,185,129,.2)"}}>📖 <strong>Study Style:</strong> {analysis.studyStyle}</div>}
+              </div>
+              <div className="g2">
+                {analysis.weakAreas?.length>0&&(<div className="card"><div className="card-glow"/><div style={{fontSize:13.5,fontWeight:800,marginBottom:12,color:"var(--tx)"}}>🔴 Root Cause Analysis</div>{analysis.weakAreas.map((w,i)=>(<div key={i} style={{padding:"11px",background:"var(--bg2)",borderRadius:11,marginBottom:9,borderLeft:"3px solid var(--v5)"}}><div style={{fontSize:13,fontWeight:800,color:"var(--tx)",marginBottom:3}}>{w.topic}</div><div style={{fontSize:12,color:"var(--tx3)",marginBottom:5}}>🔍 {w.rootCause}</div><div style={{fontSize:12,color:"var(--v1)",fontWeight:700}}>💡 Fix: {w.fix}</div></div>))}</div>)}
+                <div className="card"><div className="card-glow"/><div style={{fontSize:13.5,fontWeight:800,marginBottom:12,color:"var(--tx)"}}>✅ Priority Action Plan</div>
+                  {analysis.priorityActions?.map((step,i)=>(<div key={i} style={{display:"flex",gap:11,padding:"9px 0",borderBottom:"1px solid var(--br)"}}><div style={{width:24,height:24,borderRadius:"50%",background:"var(--grad)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10.5,fontWeight:900,flexShrink:0,boxShadow:"0 2px 8px rgba(99,102,241,.4)"}}>{i+1}</div><span style={{fontSize:13,color:"var(--tx)",lineHeight:1.6}}>{step}</span></div>))}
+                  {analysis.strengths?.length>0&&(<div style={{marginTop:12}}><div style={{fontSize:12.5,fontWeight:800,color:"#10B981",marginBottom:7}}>💪 Your Strengths</div>{analysis.strengths.map((s,i)=><div key={i} style={{fontSize:12.5,color:"var(--tx2)",padding:"3px 0"}}>✅ {s}</div>)}</div>)}
+                </div>
+              </div>
+            </div>
+          )}
+          {!analysis&&!loading&&<div className="tipbox mt4"><span style={{fontSize:18}}>🧠</span><span>Click <strong>Analyse Now</strong> to get AI-powered insights about your learning patterns.</span></div>}
+        </>
+      )}
+    </div></div>
+  );
+}
+
+/* ══ LEADERBOARD ══ */
+function Leaderboard({user,go,apiKey}){
+  const uid=user.id;
+  const hist=LS.g(`qh_${uid}`,[]);
+  const myAvg=hist.length?Math.round(hist.reduce((a,q)=>a+q.score,0)/hist.length):0;
+  const myXP=LS.g(`xp_${uid}`,0);
+  const myStreak=LS.g(`streak_${uid}`,0);
+  // Generate mock peers for single-user mode
+  const peers=[
+    {name:"Aakash K.",avatar:"",score:87,xp:1420,streak:12,quizzes:24},
+    {name:"Priya S.",avatar:"",score:82,xp:1180,streak:8,quizzes:19},
+    {name:"Vikram R.",avatar:"",score:79,xp:980,streak:5,quizzes:16},
+    {name:user.name,avatar:user.avatar,score:myAvg,xp:myXP,streak:myStreak,quizzes:hist.length,isMe:true},
+    {name:"Meena J.",avatar:"",score:71,xp:740,streak:3,quizzes:11},
+    {name:"Surya M.",avatar:"",score:65,xp:560,streak:2,quizzes:8},
+    {name:"Divya P.",avatar:"",score:60,xp:430,streak:1,quizzes:7},
+    {name:"Karthik B.",avatar:"",score:55,xp:310,streak:0,quizzes:5},
+  ].sort((a,b)=>b.xp-a.xp);
+  const myRank=peers.findIndex(p=>p.isMe)+1;
+  return(
+    <div className="scrollpage"><TopBar title="Leaderboard 🏆" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu" style={{maxWidth:640}}>
+      <div className="card mb4" style={{background:"linear-gradient(135deg,#0A0520,#1a0a3e,#6366F1)",border:"none",color:"#fff",textAlign:"center",padding:"28px"}}>
+        <div style={{fontSize:40}}>🏆</div>
+        <h2 style={{fontSize:20,fontWeight:900,marginTop:10}}>Your Rank: <span style={{background:"var(--grad-gold)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>#{myRank}</span></h2>
+        <p style={{fontSize:13,opacity:.75,marginTop:6}}>{myXP} XP · {myStreak} day streak · {hist.length} quizzes</p>
+      </div>
+      <div className="card"><div className="card-glow"/>
+        <div className="card-hd"><div className="card-title">Class Rankings</div><span className="tag ta">Live</span></div>
+        {peers.map((p,i)=>{
+          const rankCls=i===0?"gold":i===1?"silver":i===2?"bronze":"other";
+          return(
+            <div key={i} className={`lb-row${p.isMe?" lb-me":""}`}>
+              <div className={`lb-rank ${rankCls}`}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+              <div className="lb-av">{p.avatar?<img src={p.avatar} alt="" onError={e=>{e.target.style.display="none"}}/>:ini(p.name)}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{p.name}{p.isMe&&<span className="tag tb" style={{marginLeft:6,fontSize:10}}>You</span>}</div>
+                <div style={{fontSize:11.5,color:"var(--tx3)"}}>{p.quizzes} quizzes · {p.streak}🔥 streak</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontWeight:900,fontFamily:"var(--mono)",fontSize:14,color:"var(--tx)"}}>{p.xp} XP</div>
+                <div style={{fontSize:11,color:p.score>=70?"#10B981":"#F59E0B",fontWeight:700}}>{p.score}% avg</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div></div>
+  );
+}
+
+/* ══ PROFILE ══ */
+function ProfilePage({user,onUpdateUser,apiKey,go}){
+  const uid=user.id;
+  const [editing,setEditing]=useState(false);
+  const [f,setF]=useState({name:user.name,email:user.email,subject:user.subject||"cs",bio:user.bio||"",avatar:user.avatar||""});
+  const [notif,setNotif]=useState(null);
+  const [tab,setTab]=useState("stats");
+  const [uploadMode,setUploadMode]=useState(false);
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const hist=LS.g(`qh_${uid}`,[]);
+  const avg=hist.length?Math.round(hist.reduce((a,q)=>a+q.score,0)/hist.length):0;
+  const streak=LS.g(`streak_${uid}`,0);
+  const xp=LS.g(`xp_${uid}`,0);
+  const lv=getLevel(xp);
+  const pp=LS.g(`pp_${uid}`,{});
+  const done=Object.values(pp).filter(Boolean).length;
+  const subj=SUBJECTS.find(s=>s.id===f.subject)||SUBJECTS[0];
+  const passRate=hist.length?Math.round(hist.filter(q=>q.score>=60).length/hist.length*100):0;
+  const uniqueSubjects=new Set(hist.map(q=>q.subject)).size;
+  const hardCount=hist.filter(q=>q.diff==="hard").length;
+  const chatCount=LS.g(`chat_count_${uid}`,0);
+  const analyzed=!!LS.g(`analysis_${uid}`,null);
+  const hasPlan=!!LS.g(`plan_${uid}`,null);
+  const allStats={totalQ:hist.length,avg,best:hist.length?Math.max(...hist.map(q=>q.score)):0,streak,passRate,uniqueSubjects,hardCount,chatCount,analyzed,hasPlan};
+  const unlockedBadges=BADGES.filter(b=>b.condition(allStats));
+  const lockedBadges=BADGES.filter(b=>!b.condition(allStats));
+  const save=()=>{
+    if(!f.name.trim()){setNotif({msg:"Name cannot be empty.",type:"error"});return}
+    const users=LS.g("es_users",[]);
+    const updated={...user,...f};
+    LS.s("es_users",users.map(u=>u.id===uid?updated:u));
+    onUpdateUser(updated);setEditing(false);
+    setNotif({msg:"Profile updated! ✨",type:"success"});
+  };
+  const handleAvatarFile=(e)=>{
+    const file=e.target.files[0];if(!file)return;
+    if(file.size>2*1024*1024){setNotif({msg:"Image too large (max 2MB)",type:"error"});return}
+    const reader=new FileReader();
+    reader.onload=ev=>{set("avatar",ev.target.result);setUploadMode(false)};
+    reader.readAsDataURL(file);
+  };
+  const TABS=["stats","badges","history"];
+  return(
+    <div className="scrollpage">
+      <TopBar title="Profile 👤" user={user} apiKey={apiKey} go={go}><button className="btn btn-v" onClick={()=>setEditing(true)}>✏️ Edit Profile</button></TopBar>
+      <div className="ppad fu">
+        {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+        <div className="card mb4" style={{padding:0,overflow:"hidden"}}>
+          <div className="pcov" style={{position:"relative"}}>
+            <div className="profile-cover-actions">
+              <span className="level-badge"><div className="level-circle">{lv.level}</div><div className="level-text">Lv.{lv.level} {LEVEL_NAMES[lv.level]}</div></span>
+            </div>
+          </div>
+          <div style={{position:"relative",paddingTop:50,padding:"50px 24px 24px"}}>
+            <div className="pav-wrap" style={{position:"absolute",top:-44,left:24}}>
+              <div className="pav" onClick={()=>setEditing(true)}>
+                {f.avatar?<img src={f.avatar} alt="" onError={e=>{e.target.style.display="none"}}/>:ini(f.name)}
+                <div className="pav-edit-overlay">✏️</div>
+              </div>
+            </div>
+            <div style={{paddingTop:10}}>
+              <div className="rbb" style={{flexWrap:"wrap",gap:12,marginBottom:12}}>
+                <div>
+                  <h2 style={{fontSize:22,fontWeight:900,letterSpacing:"-.4px",color:"var(--tx)"}}>{f.name}</h2>
+                  <p style={{fontSize:13,color:"var(--tx3)",marginTop:3}}>{f.email} · {subj.i} {subj.l}</p>
+                  {f.bio&&<p style={{fontSize:13.5,color:"var(--tx2)",marginTop:8,lineHeight:1.65,maxWidth:480}}>{f.bio}</p>}
+                </div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {user.google&&<span className="tag tb">🔵 Google</span>}
+                  <span className="tag tp">⚡ {xp} XP</span>
+                  {streak>0&&<span className="tag tg">🔥 {streak}d streak</span>}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                {[{l:"Quizzes",v:hist.length},{l:"Avg Score",v:avg?avg+"%":"—"},{l:"Streak",v:streak+"🔥"},{l:"Topics Done",v:done},{l:"Badges",v:unlockedBadges.length},{l:"Joined",v:new Date(user.joinedAt||Date.now()).toLocaleDateString("en-IN",{month:"short",year:"numeric"})}].map((s,i)=>(
+                  <div key={i} style={{padding:"10px 18px",background:"var(--bg2)",borderRadius:12,textAlign:"center",border:"1px solid var(--br)",minWidth:80}}>
+                    <div style={{fontSize:18,fontWeight:900,color:"var(--tx)"}}>{s.v}</div>
+                    <div style={{fontSize:11,color:"var(--tx3)",marginTop:3,fontWeight:600}}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Tabs */}
+        <div style={{display:"flex",gap:4,marginBottom:18,background:"var(--bg2)",borderRadius:12,padding:4,border:"1px solid var(--br)"}}>
+          {TABS.map(t=><button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"9px",borderRadius:9,border:"none",cursor:"pointer",fontFamily:"var(--font)",fontSize:13,fontWeight:700,background:tab===t?"var(--grad)":"transparent",color:tab===t?"#fff":"var(--tx2)",transition:"all .2s",boxShadow:tab===t?"0 2px 10px rgba(99,102,241,.35)":"none"}}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
+        </div>
+        {tab==="stats"&&(
+          <div className="g3">
+            {[{l:"Total Quizzes",v:hist.length,e:"📝"},{l:"Average Score",v:avg?avg+"%":"—",e:"🎯"},{l:"Best Score",v:(hist.length?Math.max(...hist.map(q=>q.score)):0)+"%",e:"🏆"},{l:"Pass Rate",v:passRate+"%",e:"✅"},{l:"Subjects Tried",v:uniqueSubjects,e:"📚"},{l:"Hard Quizzes",v:hardCount,e:"💪"}].map((s,i)=>(
+              <div className="card" key={i}><div className="card-glow"/>
+                <div style={{fontSize:24,marginBottom:8}}>{s.e}</div>
+                <div style={{fontSize:22,fontWeight:900,color:"var(--tx)"}}>{s.v}</div>
+                <div style={{fontSize:11.5,color:"var(--tx3)",marginTop:4,fontWeight:600}}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==="badges"&&(
+          <div>
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:14,fontWeight:800,color:"var(--tx)",marginBottom:4}}>🏅 Earned Badges ({unlockedBadges.length}/{BADGES.length})</div>
+              <div className="badge-grid">
+                {unlockedBadges.map(b=><div key={b.id} className="badge-item unlocked"><div className="badge-icon">{b.icon}</div><div className="badge-name">{b.name}</div><div className="badge-desc">{b.desc}</div></div>)}
+                {unlockedBadges.length===0&&<p style={{fontSize:13,color:"var(--tx3)"}}>Complete quizzes to earn badges!</p>}
+              </div>
+            </div>
+            {lockedBadges.length>0&&<div>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--tx3)",marginBottom:10}}>🔒 Locked ({lockedBadges.length})</div>
+              <div className="badge-grid">
+                {lockedBadges.map(b=><div key={b.id} className="badge-item locked"><div className="badge-icon">{b.icon}</div><div className="badge-name">{b.name}</div><div className="badge-desc">{b.desc}</div></div>)}
+              </div>
+            </div>}
+          </div>
+        )}
+        {tab==="history"&&(
+          <div className="card"><div className="card-glow"/>
+            {hist.length===0?<div className="empty"><div className="empty-ico">📝</div><h3>No quizzes yet</h3></div>:(
+              <div style={{overflowX:"auto"}}><table className="dtbl"><thead><tr><th>Topic</th><th>Score</th><th>Diff</th><th>Date</th></tr></thead>
+              <tbody>{[...hist].reverse().slice(0,20).map((q,i)=>(<tr key={i}><td style={{fontWeight:700,color:"var(--tx)"}}>{q.topic}</td><td><span style={{fontWeight:900,fontFamily:"var(--mono)",color:q.score>=70?"#10B981":q.score>=50?"#F59E0B":"#F43F5E"}}>{q.score}%</span></td><td><span className={`tag ${q.diff==="easy"?"tg":q.diff==="hard"?"tr":"ta"}`}>{q.diff}</span></td><td className="mono txm" style={{fontSize:11}}>{ds(q.date)}</td></tr>))}</tbody>
+              </table></div>
+            )}
+          </div>
+        )}
+      </div>
+      {editing&&(
+        <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)setEditing(false)}}>
+          <div className="modal">
+            <div className="rbb mb4"><h3 style={{fontSize:18,fontWeight:900}}>Edit Profile</h3><button className="btn-icon" onClick={()=>setEditing(false)}>✕</button></div>
+            {/* Avatar upload */}
+            <div className="field">
+              <label className="lbl">Profile Picture</label>
+              <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:10}}>
+                <div style={{width:64,height:64,borderRadius:"50%",overflow:"hidden",border:"3px solid var(--br2)",background:"var(--bg2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:"var(--tx)"}}>
+                  {f.avatar?<img src={f.avatar} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none"}}/>:ini(f.name)}
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                  <label style={{cursor:"pointer"}}>
+                    <input type="file" accept="image/*" style={{display:"none"}} onChange={handleAvatarFile}/>
+                    <div className="btn btn-out btn-sm" style={{cursor:"pointer"}}>📁 Upload Photo</div>
+                  </label>
+                  <div style={{fontSize:11,color:"var(--tx3)"}}>or paste URL below (max 2MB)</div>
+                </div>
+              </div>
+              <input className="inp" placeholder="https://example.com/photo.jpg" value={f.avatar} onChange={e=>set("avatar",e.target.value)}/>
+            </div>
+            <div className="field"><label className="lbl">Full Name</label><input className="inp" value={f.name} onChange={e=>set("name",e.target.value)}/></div>
+            <div className="field"><label className="lbl">Email {user.google?"(Google — locked)":""}</label><input className="inp" type="email" value={f.email} onChange={e=>set("email",e.target.value)} disabled={!!user.google} style={user.google?{opacity:.5}:{}}/></div>
+            <div className="field"><label className="lbl">Primary Subject</label><select className="inp" value={f.subject} onChange={e=>set("subject",e.target.value)}>{SUBJECTS.map(s=><option key={s.id} value={s.id}>{s.i} {s.l}</option>)}</select></div>
+            <div className="field"><label className="lbl">Bio</label><textarea className="inp" placeholder="Tell us about yourself…" value={f.bio} onChange={e=>set("bio",e.target.value)} rows={3}/></div>
+            <div style={{display:"flex",gap:9,justifyContent:"flex-end"}}><button className="btn btn-out" onClick={()=>setEditing(false)}>Cancel</button><button className="btn btn-v" onClick={save}>Save Changes ✨</button></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══ SETTINGS ══ */
+function Settings({user,apiKey,onSaveKey,onLogout,go}){
+  const uid=user.id;
+  const [key,setKey]=useState(apiKey||"");
+  const [show,setShow]=useState(false);
+  const [notif,setNotif]=useState(null);
+  const [confirmState,setConfirmState]=useState(null);
+  const askConfirm=(title,message,onConfirm)=>setConfirmState({title,message,onConfirm});
+  const apiKeyValid=key.trim().length>20&&key.trim().startsWith("gsk_");
+  return(
+    <div className="scrollpage">
+      <TopBar title="Settings ⚙️" user={user} apiKey={apiKey} go={go}/>
+      {confirmState&&<ConfirmModal title={confirmState.title} message={confirmState.message} onConfirm={()=>{confirmState.onConfirm();setConfirmState(null);setNotif({msg:"Cleared!",type:"info"})}} onCancel={()=>setConfirmState(null)}/>}
+      <div className="ppad fu" style={{maxWidth:640}}>
+        {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+        {/* GROQ API Key */}
+        <div className="card mb4"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">🔑 Groq API Key</div><div className="card-sub">Powers AI Chat, Quiz, Study Plan, and Analysis</div></div>{apiKey&&<span className="tag tg">✓ Active</span>}</div>
+          <div style={{padding:"12px 14px",background:"var(--bg2)",borderRadius:11,fontSize:13,color:"var(--tx2)",marginBottom:14,lineHeight:1.65,border:"1px solid var(--br)"}}>
+            Get your <strong>free</strong> API key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="groq-link">console.groq.com/keys</a>. <strong>No credit card needed.</strong> Supports Llama 3.3 70B (fastest free LLM).
+          </div>
+          <div className="field">
+            <label className="lbl">API Key</label>
+            <div className="api-input-wrap">
+              <input className="inp" type={show?"text":"password"} placeholder="gsk_…" value={key} onChange={e=>setKey(e.target.value)}/>
+              <button className="api-vis-btn" onClick={()=>setShow(s=>!s)}>{show?"🙈":"👁️"}</button>
+            </div>
+            {key.length>5&&!apiKeyValid&&<div style={{fontSize:12,color:"#F59E0B",marginTop:6}}>⚠️ Key should start with "gsk_"</div>}
+          </div>
+          <button className="btn btn-v" onClick={()=>{onSaveKey(key.trim());setNotif({msg:"API key saved! 🎉",type:"success"})}} disabled={!key.trim()}>Save API Key</button>
+          {apiKey&&<button className="btn btn-danger btn-sm" style={{marginLeft:10}} onClick={()=>{onSaveKey("");setKey("");setNotif({msg:"API key removed.",type:"info"})}}>Remove</button>}
+        </div>
+        {/* Data Management */}
+        <div className="card mb4"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">🗃️ Data Management</div><div className="card-sub">All data stored locally in your browser</div></div></div>
+          <div style={{display:"flex",gap:9,flexWrap:"wrap"}}>
+            {[["🗑 Quiz History",()=>askConfirm("Clear Quiz History","This will permanently delete all your quiz results.",()=>{LS.d(`qh_${uid}`);LS.d(`xp_${uid}`);LS.d(`streak_${uid}`);LS.d(`streak_day_${uid}`)})],["🗑 Study Plan",()=>askConfirm("Delete Study Plan","This will delete your current study plan.",()=>{LS.d(`plan_${uid}`);LS.d(`pp_${uid}`)})],["🗑 Chat",()=>askConfirm("Clear Chat","This will delete all chat messages.",()=>LS.d(`chat_${uid}`))],["🗑 Flashcards",()=>askConfirm("Clear Flashcards","This will delete your saved flashcards.",()=>LS.d(`flash_${uid}`))],["🗑 Analysis",()=>askConfirm("Clear Analysis","This will delete your saved analysis.",()=>LS.d(`analysis_${uid}`))]].map(([l,fn],i)=>(
+              <button key={i} className="btn btn-danger btn-sm" onClick={fn}>{l}</button>
+            ))}
+          </div>
+        </div>
+        {/* About */}
+        <div className="card mb4"><div className="card-glow"/>
+          <div className="card-hd"><div className="card-title">ℹ️ About EduSense AI</div></div>
+          <div style={{fontSize:13.5,color:"var(--tx2)",lineHeight:1.85}}>
+            <p><strong className="txv">EduSense AI</strong> — Elite AI-powered personalised learning platform.</p>
+            <p style={{marginTop:6}}>Built for <strong>MEGAVERSE 2026 Hackathon</strong> by <strong>AIDS Department</strong>, Muthayammal Engineering College, Rasipuram.</p>
+            <p style={{marginTop:6}}>Powered by <strong>Groq API</strong> (Llama 3.3 70B) · Built with <strong>React.js</strong> · <strong>Chart.js</strong></p>
+          </div>
+          <div style={{marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>{["v4.0.0","Plus Jakarta Sans","Groq AI","Llama 3.3 70B","MEGAVERSE 2026","AIDS Dept · MEC","Gamified"].map((t,i)=><span key={i} className={`tag ${["tp","tb","tpk","tc","ta","tg","tr"][i]}`}>{t}</span>)}</div>
+        </div>
+        <button className="btn btn-danger btn-lg" onClick={onLogout}>🚪 Sign Out of EduSense AI</button>
+      </div>
+    </div>
+  );
+}
+
+/* ══ AUTH ══ */
+function Auth({onLogin}){
+  const [mode,setMode]=useState("login");
+  const [f,setF]=useState({name:"",email:"",password:"",subject:"cs"});
+  const [err,setErr]=useState("");
+  const [loading,setL]=useState(false);
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const googleLogin=async()=>{
+    if(!FB_CONFIGURED||!fbAuth){alert("Firebase not configured. Use email/password login.");return}
+    setL(true);setErr("");
+    try{const r=await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());const profile=await loadUserProfile(r.user.uid)||{subject:"cs"};if(mode==="signup"){await saveUserProfile(r.user.uid,{...profile,subject:f.subject,joinedAt:profile.joinedAt||new Date().toISOString()});}const u=fbUserToLocal(r.user,profile);onLogin(u);}
+    catch(e){setErr(e.message)}
+    setL(false);
+  };
+  const submit=async()=>{
+    if(!f.email.trim()||!f.password.trim()){setErr("Please fill in all fields.");return}
+    if(mode==="signup"&&!f.name.trim()){setErr("Please enter your name.");return}
+    setL(true);setErr("");
+    if(FB_CONFIGURED&&fbAuth){
+      try{
+        let result;
+        if(mode==="signup"){result=await fbAuth.createUserWithEmailAndPassword(f.email,f.password);await result.user.updateProfile({displayName:f.name});const profile={name:f.name,email:f.email,avatar:"",subject:f.subject,bio:"",joinedAt:new Date().toISOString()};await saveUserProfile(result.user.uid,profile);const u=fbUserToLocal(result.user,profile);onLogin(u);}
+        else{result=await fbAuth.signInWithEmailAndPassword(f.email,f.password);const profile=await loadUserProfile(result.user.uid)||{};const u=fbUserToLocal(result.user,profile);onLogin(u);}
+      }catch(e){const msgs={"auth/email-already-in-use":"Email already registered.","auth/user-not-found":"No account found.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Incorrect email or password.","auth/invalid-email":"Invalid email address.","auth/too-many-requests":"Too many attempts. Wait a moment."};setErr(msgs[e.code]||e.message)}
+      setL(false);return;
+    }
+    await new Promise(r=>setTimeout(r,500));
+    const users=LS.g("es_users",[]);
+    if(mode==="login"){const u=users.find(u=>u.email===f.email&&u.password===f.password);if(!u){setErr("Incorrect email or password.");setL(false);return}onLogin(u);}
+    else{if(users.find(u=>u.email===f.email)){setErr("Email already registered.");setL(false);return}const u={id:Date.now(),name:f.name,email:f.email,password:f.password,subject:f.subject,avatar:"",bio:"",joinedAt:new Date().toISOString()};LS.s("es_users",[...users,u]);onLogin(u);}
+    setL(false);
+  };
+  const feats=["🎯 Pinpoints your exact knowledge gaps","📅 Builds AI-powered day-wise study plans","💬 Explains any concept with a 24/7 AI tutor","📊 Tracks progress with beautiful analytics","⚡ Adaptive quizzes that target your weaknesses","🃏 Active recall with smart flashcards","🏆 Gamified XP system & badges","🔬 AI-powered weakness root-cause analysis"];
+  return(
+    <div className="auth-shell">
+      <div className="auth-left">
+        <div className="auth-orb1"/><div className="auth-orb2"/><div className="auth-orb3"/>
+        <div className="auth-content">
+          <div className="auth-brand"><div className="auth-logo-mark">🧠</div><div className="auth-wordmark">EduSense <em>AI</em></div></div>
+          <h1 className="auth-h1">Learn Smarter.<br/>Score Higher.</h1>
+          <p className="auth-sub">AI-powered personalised learning that detects exactly what you don't know — and builds a roadmap to fix it.</p>
+          {feats.map((feat,i)=><div className="auth-feat" key={i}><div className="auth-feat-icon">{feat.slice(0,2)}</div>{feat.slice(2)}</div>)}
+          <div style={{marginTop:32,padding:"13px 16px",background:"rgba(255,255,255,.06)",borderRadius:13,border:"1px solid rgba(255,255,255,.1)",color:"rgba(255,255,255,.7)",fontSize:12.5,lineHeight:1.6}}>
+            🏆 <strong style={{color:"#fff"}}>MEGAVERSE 2026</strong> · AIDS Dept · Muthayammal Engineering College
+          </div>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-box fu">
+          <div style={{marginBottom:24}}>
+            <h2 style={{fontSize:24,fontWeight:900,letterSpacing:"-.4px",color:"var(--tx)"}}>{mode==="login"?"Welcome back 👋":"Get started ✨"}</h2>
+            <p style={{fontSize:13,color:"var(--tx3)",marginTop:5}}>{mode==="login"?"Sign in to continue your learning journey":"Join EduSense AI and start learning smarter"}</p>
+          </div>
+          <div className="auth-tab">
+            <button className={`auth-tab-btn ${mode==="login"?"on":""}`} onClick={()=>{setMode("login");setErr("")}}>Sign In</button>
+            <button className={`auth-tab-btn ${mode==="signup"?"on":""}`} onClick={()=>{setMode("signup");setErr("")}}>Sign Up</button>
+          </div>
+          <button className="btn btn-google w100" onClick={googleLogin} disabled={loading} style={{marginBottom:14,padding:"11px 18px",fontSize:13.5,fontWeight:700,justifyContent:"center",gap:9,border:"2px solid var(--br2)"}}>
+            {loading?<span className="spin spin-v"/>:<><svg width="19" height="19" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.31z"/></svg>Continue with Google</>}
+          </button>
+          {!FB_CONFIGURED&&<div style={{marginBottom:12,padding:"12px 14px",background:"rgba(99,102,241,.07)",border:"1.5px solid rgba(99,102,241,.2)",borderRadius:11,fontSize:12,color:"var(--tx2)",lineHeight:1.8}}><div style={{fontWeight:800,color:"var(--v1)",marginBottom:6,fontSize:12.5}}>🔥 Firebase Setup (one-time, 5 mins)</div><div>1. <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" style={{color:"var(--v1)",fontWeight:700}}>console.firebase.google.com</a> → Authentication → Enable Google + Email/Password</div><div>2. Firestore Database → Create (test mode) → paste firebaseConfig above</div></div>}
+          <div className="auth-div">or with email</div>
+          {err&&<div style={{padding:"9px 13px",background:"rgba(244,63,94,.1)",color:"#F43F5E",borderRadius:10,fontSize:12.5,marginBottom:14,fontWeight:600,border:"1px solid rgba(244,63,94,.2)",display:"flex",alignItems:"center",gap:7}}><span>⚠️</span>{err}</div>}
+          {mode==="signup"&&<div className="field"><label className="lbl">Full Name</label><input className="inp" placeholder="Your full name" value={f.name} onChange={e=>set("name",e.target.value)}/></div>}
+          <div className="field"><label className="lbl">Email Address</label><input className="inp" type="email" placeholder="you@student.edu" value={f.email} onChange={e=>set("email",e.target.value)}/></div>
+          <div className="field"><label className="lbl">Password</label><input className="inp" type="password" placeholder="Min 6 characters" value={f.password} onChange={e=>set("password",e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}/></div>
+          {mode==="signup"&&<div className="field"><label className="lbl">Primary Subject</label><select className="inp" value={f.subject} onChange={e=>set("subject",e.target.value)}>{SUBJECTS.map(s=><option key={s.id} value={s.id}>{s.i} {s.l}</option>)}</select></div>}
+          <button className="btn btn-v w100 btn-lg" onClick={submit} disabled={loading}>{loading?<span className="spin"/>:(mode==="login"?"Sign In →":"Create Account →")}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══ ROOT APP ══ */
+function App(){
+  const [user,setUser]=useState(LS.g("es_user",null));
+  const [page,setPage]=useState("dashboard");
+  const [dark,setDark]=useState(LS.g("es_dark",false));
+  const [apiKey,setApiKey]=useState(LS.g("es_key",""));
+  const [mobileOpen,setMobileOpen]=useState(false);
+  useEffect(()=>{document.documentElement.setAttribute("data-theme",dark?"dark":"light");LS.s("es_dark",dark)},[dark]);
+  useEffect(()=>{
+    if(!FB_CONFIGURED||!fbAuth)return;
+    const unsub=fbAuth.onAuthStateChanged(async(fbUser)=>{
+      if(fbUser&&!LS.g("es_user",null)){const profile=await loadUserProfile(fbUser.uid)||{};const u=fbUserToLocal(fbUser,profile);setUser(u);LS.s("es_user",u);}
+    });
+    return()=>unsub();
+  },[]);
+  const login=(u)=>{setUser(u);LS.s("es_user",u)};
+  const logout=async()=>{if(FB_CONFIGURED&&fbAuth){try{await fbAuth.signOut()}catch(e){}}setUser(null);LS.d("es_user");setPage("dashboard")};
+  const upd=(u)=>{setUser(u);LS.s("es_user",u)};
+  const saveKey=(k)=>{setApiKey(k);LS.s("es_key",k)};
+  const go=(p)=>{setPage(p);setMobileOpen(false)};
+  const props={user,apiKey,go,onLogout:logout,onUpdateUser:upd,onSaveKey:saveKey};
+  if(!user)return <Auth onLogin={login}/>;
+  const renderPage=()=>{switch(page){case"dashboard":return<Dashboard {...props}/>;case"chat":return<Chat {...props}/>;case"quiz":return<Quiz {...props}/>;case"plan":return<Plan {...props}/>;case"flashcards":return<Flashcards {...props}/>;case"progress":return<Progress {...props}/>;case"weakness":return<Weakness {...props}/>;case"leaderboard":return<Leaderboard {...props}/>;case"profile":return<ProfilePage {...props}/>;case"settings":return<Settings {...props}/>;default:return<Dashboard {...props}/>}};
+  return(
+    <div className="shell">
+      <button className="sb-hamb" onClick={()=>setMobileOpen(o=>!o)}>☰</button>
+      <Sidebar user={user} page={page} go={go} logout={logout} dark={dark} toggleDark={()=>setDark(d=>!d)} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen}/>
+      <div className="main">{renderPage()}</div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
