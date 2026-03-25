@@ -401,7 +401,8 @@ const SYS_PLAN=(days,weak)=>`You are an expert academic planner. Create a struct
 const SYS_ANALYSIS=`You are an academic performance analyst. You MUST respond with ONLY a raw JSON object — no explanation, no markdown, no code fences, no preamble. Start your response with { and end with }. Use this exact schema: {"summary":"string","weakAreas":[{"topic":"string","rootCause":"string","fix":"string"}],"strengths":["string"],"priorityActions":["string","string","string","string","string"],"estimatedImprovement":"string","weeklyGoal":"string","studyStyle":"string","motivationTip":"string"}`;
 const SYS_FLASH=`You are a flashcard generator. Generate 10 flashcards for the given topic. Return ONLY valid JSON: {"cards":[{"front":"Question or term","back":"Answer or definition"}]}`;
 
-/* ══ GAMIFICATION ══ */
+const SYS_INTERVIEW=`You are an expert technical interviewer and career coach. Generate interview Q&A. Return ONLY valid JSON: {"questions":[{"q":"Question","category":"technical|behavioral|conceptual","difficulty":"easy|medium|hard","ideal":"Ideal answer in 3-5 sentences","tips":"Quick tip for answering","followUp":"A likely follow-up question"}]}. Generate exactly 5 questions.`;
+const SYS_NOTES=`You are an expert academic note-taker and summarizer. Given content, generate structured smart notes. Return ONLY valid JSON: {"title":"Topic title","summary":"2-3 sentence overview","keyPoints":["point1","point2","point3","point4","point5"],"mnemonics":[{"term":"term","mnemonic":"memory trick"}],"formulae":["formula or key fact"],"examTips":["exam tip 1","exam tip 2","exam tip 3"],"difficulty":"easy|medium|hard","estimatedReadTime":"X mins"}. No extra text.`;
 const BADGES=[
   {id:"first_quiz",icon:"🎯",name:"First Shot",desc:"Complete first quiz",condition:(stats)=>stats.totalQ>=1},
   {id:"streak3",icon:"🔥",name:"On Fire",desc:"3-day streak",condition:(stats)=>stats.streak>=3},
@@ -438,7 +439,7 @@ function Sidebar({user,page,go,logout,dark,toggleDark,mobileOpen,setMobileOpen})
   const xp=LS.g(`xp_${uid}`,0);
   const lv=getLevel(xp);
   const nav=[
-    {sec:"Learn",items:[{id:"dashboard",i:"🏠",l:"Dashboard"},{id:"chat",i:"💬",l:"AI Tutor"},{id:"quiz",i:"⚡",l:"Quiz Generator"},{id:"plan",i:"📅",l:"Study Plan"},{id:"flashcards",i:"🃏",l:"Flashcards"}]},
+    {sec:"Learn",items:[{id:"dashboard",i:"🏠",l:"Dashboard"},{id:"chat",i:"💬",l:"AI Tutor"},{id:"quiz",i:"⚡",l:"Quiz Generator"},{id:"plan",i:"📅",l:"Study Plan"},{id:"flashcards",i:"🃏",l:"Flashcards"},{id:"interview",i:"🎤",l:"Interview Prep",badge:"NEW"},{id:"notes",i:"📝",l:"Smart Notes",badge:"NEW"},{id:"pomodoro",i:"⏰",l:"Focus Timer",badge:"NEW"}]},
     {sec:"Insights",items:[{id:"progress",i:"📊",l:"Progress"},{id:"weakness",i:"🎯",l:"Weakness AI"},{id:"leaderboard",i:"🏆",l:"Leaderboard"}]},
     {sec:"Account",items:[{id:"profile",i:"👤",l:"Profile"},{id:"settings",i:"⚙️",l:"Settings"}]},
   ];
@@ -474,6 +475,7 @@ function Sidebar({user,page,go,logout,dark,toggleDark,mobileOpen,setMobileOpen})
               {g.items.map(item=>(
                 <div key={item.id} className={`sb-item${page===item.id?" act":""}`} onClick={()=>{go(item.id);close()}}>
                   <span className="sb-icon">{item.i}</span>{item.l}
+                  {item.badge&&page!==item.id&&<span className="sb-badge" style={{fontSize:8,padding:"1px 5px",background:"linear-gradient(90deg,#10B981,#06B6D4)"}}>{item.badge}</span>}
                   {page===item.id&&<div className="sb-act-dot"/>}
                 </div>
               ))}
@@ -564,10 +566,10 @@ function Dashboard({user,go,apiKey}){
           {hist.length===0?<div className="empty" style={{padding:"30px 0"}}><div className="empty-ico">📊</div><h3>No quiz data yet</h3><p>Take your first quiz!</p></div>:<div className="chart-box"><canvas ref={chartRef}/></div>}
         </div>
         <div className="card"><div className="card-glow"/><div className="card-hd"><div className="card-title">Quick Actions</div></div>
-          {[{i:"💬",l:"AI Tutor Chat",s:"Ask any concept doubt",p:"chat",c:"#6366F1"},{i:"⚡",l:"Generate Quiz",s:"AI quiz targeting your gaps",p:"quiz",c:"#A855F7"},{i:"📅",l:"Study Plan",s:"Your AI day-wise schedule",p:"plan",c:"#EC4899"},{i:"🃏",l:"Flashcards",s:"Active recall practice",p:"flashcards",c:"#06B6D4"},{i:"🎯",l:"Weakness Analysis",s:"Deep AI-powered insights",p:"weakness",c:"#10B981"}].map((a,i)=>(
+          {[{i:"💬",l:"AI Tutor Chat",s:"Ask any concept doubt",p:"chat",c:"#6366F1"},{i:"⚡",l:"Generate Quiz",s:"AI quiz targeting your gaps",p:"quiz",c:"#A855F7"},{i:"📅",l:"Study Plan",s:"Your AI day-wise schedule",p:"plan",c:"#EC4899"},{i:"🎤",l:"Interview Prep",s:"AI mock interviews & feedback",p:"interview",c:"#F59E0B",badge:"NEW"},{i:"📝",l:"Smart Notes",s:"AI-generated structured notes",p:"notes",c:"#06B6D4",badge:"NEW"},{i:"⏰",l:"Focus Timer",s:"Pomodoro productivity timer",p:"pomodoro",c:"#10B981",badge:"NEW"}].map((a,i)=>(
             <div key={i} onClick={()=>go(a.p)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px",borderRadius:12,cursor:"pointer",marginBottom:6,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background="var(--bg2)";e.currentTarget.style.transform="translateX(4px)"}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.transform="none"}}>
               <div style={{width:38,height:38,borderRadius:11,background:`${a.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,border:`1px solid ${a.c}30`}}>{a.i}</div>
-              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{a.l}</div><div style={{fontSize:11.5,color:"var(--tx3)"}}>{a.s}</div></div>
+              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"var(--tx)",display:"flex",alignItems:"center",gap:6}}>{a.l}{a.badge&&<span style={{fontSize:9,fontWeight:800,padding:"2px 6px",borderRadius:99,background:"linear-gradient(90deg,#10B981,#06B6D4)",color:"#fff"}}>{a.badge}</span>}</div><div style={{fontSize:11.5,color:"var(--tx3)"}}>{a.s}</div></div>
               <span style={{color:"var(--tx3)",fontSize:16,fontWeight:700}}>›</span>
             </div>
           ))}
@@ -1390,7 +1392,7 @@ function Settings({user,apiKey,onSaveKey,onLogout,go}){
             <p style={{marginTop:6}}>Built for <strong>MEGAVERSE 2026 Hackathon</strong> by <strong>AIDS Department</strong>, Muthayammal Engineering College, Rasipuram.</p>
             <p style={{marginTop:6}}>Powered by <strong>Groq API</strong> (Llama 3.3 70B) · Built with <strong>React.js</strong> · <strong>Chart.js</strong></p>
           </div>
-          <div style={{marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>{["v4.1.0","Plus Jakarta Sans","Groq AI","Llama 3.3 70B","MEGAVERSE 2026","AIDS Dept · MEC","Gamified"].map((t,i)=><span key={i} className={`tag ${["tp","tb","tpk","tc","ta","tg","tr"][i]}`}>{t}</span>)}</div>
+          <div style={{marginTop:12,display:"flex",gap:7,flexWrap:"wrap"}}>{["v5.0.0","Interview Prep","Smart Notes","Focus Timer","Groq AI","Llama 3.3 70B","MEGAVERSE 2026","AIDS Dept · MEC"].map((t,i)=><span key={i} className={`tag ${["tp","tb","tpk","tc","ta","tg","tr","ta"][i]}`}>{t}</span>)}</div>
         </div>
         <button className="btn btn-danger btn-lg" onClick={onLogout}>🚪 Sign Out of EduSense AI</button>
       </div>
@@ -1471,6 +1473,381 @@ function Auth({onLogin}){
   );
 }
 
+/* ══ INTERVIEW PREP ══ */
+function InterviewPrep({user,apiKey,go}){
+  const uid=user.id;
+  const [phase,setPhase]=useState("setup");
+  const [subj,setSubj]=useState(user.subject||"cs");
+  const [role,setRole]=useState("");
+  const [diff,setDiff]=useState("medium");
+  const [questions,setQuestions]=useState([]);
+  const [cur,setCur]=useState(0);
+  const [revealed,setRevealed]=useState({});
+  const [loading,setL]=useState(false);
+  const [notif,setNotif]=useState(null);
+  const [mode,setMode]=useState("qa"); // qa | mock
+  const [mockAns,setMockAns]=useState("");
+  const [mockFeedback,setMockFeedback]=useState(null);
+  const [fbLoading,setFbLoading]=useState(false);
+  const sObj=SUBJECTS.find(s=>s.id===subj)||SUBJECTS[0];
+  const roles={cs:"Software Engineer",math:"Data Scientist",physics:"Research Scientist",chemistry:"Lab Analyst",biology:"Biologist",aids:"ML Engineer"};
+  const generate=async()=>{
+    if(!apiKey){alert("Add API key!");return}
+    setL(true);
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:`Generate 5 ${diff} ${role||roles[subj]} interview questions for ${sObj.l}. Mix technical, behavioral and conceptual.`}],SYS_INTERVIEW,1200);
+      const jsonMatch=raw.match(/\{[\s\S]*\}/);
+      if(!jsonMatch)throw new Error("Invalid response");
+      const parsed=JSON.parse(jsonMatch[0]);
+      setQuestions(parsed.questions||[]);setCur(0);setRevealed({});setMockAns("");setMockFeedback(null);
+      setPhase("interview");
+    }catch(e){setNotif({msg:"Failed: "+e.message,type:"error"})}
+    setL(false);
+  };
+  const getMockFeedback=async()=>{
+    if(!mockAns.trim()||!apiKey)return;
+    setFbLoading(true);
+    const q=questions[cur];
+    try{
+      const prompt=`Interview question: "${q.q}"\nCandidate's answer: "${mockAns}"\nIdeal answer: "${q.ideal}"\n\nEvaluate the candidate's answer. Return ONLY JSON: {"score":75,"grade":"B+","strengths":["point1","point2"],"improvements":["point1","point2"],"verdict":"Good but could mention X","betterAnswer":"A more complete answer would be..."}`;
+      const raw=await groq(apiKey,[{role:"user",content:prompt}],"You are a strict but fair technical interviewer. Evaluate answers honestly. Return ONLY raw JSON starting with {.",900);
+      const jsonMatch=raw.match(/\{[\s\S]*\}/);
+      if(jsonMatch)setMockFeedback(JSON.parse(jsonMatch[0]));
+    }catch(e){setNotif({msg:"Feedback failed",type:"error"})}
+    setFbLoading(false);
+  };
+  const catColor={technical:"tb",behavioral:"tg",conceptual:"tp"};
+  if(phase==="setup")return(
+    <div className="scrollpage"><TopBar title="Interview Prep 🎤" user={user} apiKey={apiKey} go={go}/>
+    <div className="ppad fu" style={{maxWidth:680}}>
+      {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+      <div className="card mb4" style={{background:"linear-gradient(135deg,#0A0520,#1a0a3e)",border:"none",padding:"28px",color:"#fff"}}>
+        <div style={{fontSize:36,marginBottom:12}}>🎤</div>
+        <h2 style={{fontSize:22,fontWeight:900,marginBottom:8}}>AI Interview Simulator</h2>
+        <p style={{fontSize:13.5,opacity:.75,lineHeight:1.7}}>Practice real interview questions with AI feedback. Get instant evaluation on your answers, identify gaps, and build confidence before your actual interview.</p>
+        <div style={{marginTop:16,display:"flex",gap:10,flexWrap:"wrap"}}>{["Technical Q&A","Behavioral","Mock Interview","AI Feedback","Answer Analysis"].map((f,i)=><span key={i} className="tag tb" style={{background:"rgba(99,102,241,.25)",border:"1px solid rgba(99,102,241,.4)",color:"#C4B5FD"}}>{f}</span>)}</div>
+      </div>
+      <div className="g2">
+        <div className="card"><div className="card-glow"/>
+          <div className="card-hd"><div className="card-title">Configure Session</div></div>
+          <div className="field"><label className="lbl">Subject / Domain</label><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{SUBJECTS.map(s=><div key={s.id} className={`schip${subj===s.id?" on":""}`} onClick={()=>setSubj(s.id)} style={{fontSize:11.5,padding:"5px 10px"}}>{s.i} {s.l}</div>)}</div></div>
+          <div className="field"><label className="lbl">Target Role (optional)</label><input className="inp" placeholder={`e.g. ${roles[subj]}`} value={role} onChange={e=>setRole(e.target.value)}/></div>
+          <div className="field"><label className="lbl">Difficulty</label><div style={{display:"flex",gap:8}}>{["easy","medium","hard"].map(d=><div key={d} className={`schip${diff===d?" on":""}`} onClick={()=>setDiff(d)} style={{flex:1,justifyContent:"center",fontSize:12}}>{d==="easy"?"🟢":d==="medium"?"🟡":"🔴"} {d}</div>)}</div></div>
+          <div className="field"><label className="lbl">Mode</label><div style={{display:"flex",gap:8}}>{[["qa","📖 Study Mode"],["mock","🎤 Mock Interview"]].map(([v,l])=><div key={v} className={`schip${mode===v?" on":""}`} onClick={()=>setMode(v)} style={{flex:1,justifyContent:"center",fontSize:12}}>{l}</div>)}</div></div>
+          <button className="btn btn-v w100 btn-lg" onClick={generate} disabled={loading}>{loading?<><span className="spin"/> Generating…</>:"🚀 Start Interview Session"}</button>
+        </div>
+        <div className="card"><div className="card-glow"/>
+          <div style={{fontSize:13,fontWeight:800,color:"var(--tx)",marginBottom:14}}>💡 What You'll Get</div>
+          {[["🔵","Technical Questions","Core concepts, algorithms, system design"],["🟢","Behavioral Questions","STAR method, teamwork, leadership"],["🟣","Conceptual Questions","Theory, principles, definitions"],["🤖","AI Feedback","Score, strengths & improvement areas"],["⚡","Follow-up Questions","Drill deeper like real interviewers"]].map(([e,t,d],i)=>(
+            <div key={i} style={{display:"flex",gap:11,padding:"9px 0",borderBottom:"1px solid var(--br)"}}>
+              <span style={{fontSize:18}}>{e}</span><div><div style={{fontSize:13,fontWeight:700,color:"var(--tx)"}}>{t}</div><div style={{fontSize:11.5,color:"var(--tx3)"}}>{d}</div></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div></div>
+  );
+  const q=questions[cur];
+  return(
+    <div className="scrollpage">
+      <TopBar title="Interview Prep 🎤" user={user} apiKey={apiKey} go={go}>
+        <span style={{fontSize:12,color:"var(--tx3)",fontWeight:600}}>{cur+1}/{questions.length}</span>
+        <button className="btn btn-out btn-sm" onClick={()=>setPhase("setup")}>← New Session</button>
+      </TopBar>
+      <div className="ppad fu" style={{maxWidth:700}}>
+        {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+        <div className="qpbar"><div className="qpfill" style={{width:`${pct(cur,questions.length)}%`}}/></div>
+        {/* Question navigation pills */}
+        <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+          {questions.map((_,i)=><div key={i} onClick={()=>{setCur(i);setMockAns("");setMockFeedback(null)}} style={{width:32,height:32,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,cursor:"pointer",background:i===cur?"var(--grad)":revealed[i]?"rgba(16,185,129,.2)":"var(--bg2)",color:i===cur?"#fff":revealed[i]?"#10B981":"var(--tx3)",border:`2px solid ${i===cur?"transparent":revealed[i]?"rgba(16,185,129,.4)":"var(--br)"}`}}>{i+1}</div>)}
+        </div>
+        {q&&<>
+          <div className="card mb4"><div className="card-glow"/>
+            <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
+              <span className={`tag ${catColor[q.category]||"tb"}`}>{q.category}</span>
+              <span className={`tag ${q.difficulty==="easy"?"tg":q.difficulty==="hard"?"tr":"ta"}`}>{q.difficulty}</span>
+              <span style={{fontSize:12,color:"var(--tx3)",marginLeft:"auto",fontWeight:600}}>Q{cur+1} of {questions.length}</span>
+            </div>
+            <h3 style={{fontSize:17,fontWeight:800,color:"var(--tx)",lineHeight:1.6,marginBottom:16}}>{q.q}</h3>
+            {q.tips&&<div style={{padding:"10px 14px",background:"rgba(99,102,241,.07)",borderRadius:10,fontSize:12.5,color:"var(--v1)",marginBottom:16,border:"1px solid rgba(99,102,241,.2)"}}>💡 <strong>Tip:</strong> {q.tips}</div>}
+            {mode==="mock"&&<>
+              <textarea className="inp" placeholder="Type your answer here… (be as detailed as you would in a real interview)" value={mockAns} onChange={e=>setMockAns(e.target.value)} rows={5} style={{marginBottom:10}}/>
+              <button className="btn btn-v" onClick={getMockFeedback} disabled={fbLoading||!mockAns.trim()}>{fbLoading?<><span className="spin"/> Evaluating…</>:"🤖 Get AI Feedback"}</button>
+              {mockFeedback&&<div style={{marginTop:16}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:mockFeedback.score>=70?"rgba(16,185,129,.08)":mockFeedback.score>=50?"rgba(245,158,11,.08)":"rgba(244,63,94,.08)",borderRadius:12,border:`1.5px solid ${mockFeedback.score>=70?"rgba(16,185,129,.3)":mockFeedback.score>=50?"rgba(245,158,11,.3)":"rgba(244,63,94,.3)"}`,marginBottom:12}}>
+                  <div style={{textAlign:"center",minWidth:64}}><div style={{fontSize:28,fontWeight:900,color:mockFeedback.score>=70?"#10B981":mockFeedback.score>=50?"#F59E0B":"#F43F5E"}}>{mockFeedback.score}%</div><div style={{fontSize:12,fontWeight:700,color:"var(--tx2)"}}>{mockFeedback.grade}</div></div>
+                  <div style={{flex:1,fontSize:13.5,color:"var(--tx)",fontWeight:600,fontStyle:"italic"}}>"{mockFeedback.verdict}"</div>
+                </div>
+                <div className="g2" style={{marginBottom:12}}>
+                  <div style={{padding:"12px",background:"rgba(16,185,129,.06)",borderRadius:10,border:"1px solid rgba(16,185,129,.2)"}}><div style={{fontSize:12,fontWeight:800,color:"#10B981",marginBottom:7}}>✅ Strengths</div>{mockFeedback.strengths?.map((s,i)=><div key={i} style={{fontSize:12.5,color:"var(--tx2)",padding:"2px 0"}}>• {s}</div>)}</div>
+                  <div style={{padding:"12px",background:"rgba(244,63,94,.06)",borderRadius:10,border:"1px solid rgba(244,63,94,.2)"}}><div style={{fontSize:12,fontWeight:800,color:"#F43F5E",marginBottom:7}}>⚡ Improve</div>{mockFeedback.improvements?.map((s,i)=><div key={i} style={{fontSize:12.5,color:"var(--tx2)",padding:"2px 0"}}>• {s}</div>)}</div>
+                </div>
+                {mockFeedback.betterAnswer&&<div style={{padding:"12px 14px",background:"var(--bg2)",borderRadius:10,border:"1px solid var(--br)"}}>
+                  <div style={{fontSize:12,fontWeight:800,color:"var(--v1)",marginBottom:6}}>🎯 Model Answer</div>
+                  <div style={{fontSize:13,color:"var(--tx2)",lineHeight:1.7}}>{mockFeedback.betterAnswer}</div>
+                </div>}
+              </div>}
+            </>}
+            {mode==="qa"&&<button className="btn btn-v" onClick={()=>setRevealed(r=>({...r,[cur]:true}))}>
+              {revealed[cur]?"Hide Answer 👁":"Reveal Answer ✨"}
+            </button>}
+            {mode==="qa"&&revealed[cur]&&<div style={{marginTop:14,padding:"16px",background:"rgba(99,102,241,.06)",border:"1.5px solid rgba(99,102,241,.2)",borderRadius:12}}>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--v1)",marginBottom:8}}>💡 IDEAL ANSWER</div>
+              <div style={{fontSize:14,color:"var(--tx)",lineHeight:1.75}}>{q.ideal}</div>
+              {q.followUp&&<div style={{marginTop:12,padding:"10px 13px",background:"rgba(236,72,153,.08)",borderRadius:9,border:"1px solid rgba(236,72,153,.2)"}}>
+                <span style={{fontSize:11.5,fontWeight:800,color:"#EC4899"}}>🔁 FOLLOW-UP: </span>
+                <span style={{fontSize:12.5,color:"var(--tx2)"}}>{q.followUp}</span>
+              </div>}
+            </div>}
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button className="btn btn-out" style={{flex:1}} disabled={cur===0} onClick={()=>{setCur(c=>c-1);setMockAns("");setMockFeedback(null)}}>← Previous</button>
+            <button className="btn btn-v" style={{flex:1}} disabled={cur===questions.length-1} onClick={()=>{setCur(c=>c+1);setMockAns("");setMockFeedback(null)}}>Next Question →</button>
+          </div>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+/* ══ SMART NOTES ══ */
+function SmartNotes({user,apiKey,go}){
+  const uid=user.id;
+  const [notes,setNotes]=useState(LS.g(`notes_${uid}`,[{id:1,title:"Welcome Note",content:"Start typing or paste content to generate smart notes!",tags:["intro"],pinned:true,created:new Date().toISOString(),generated:null}]));
+  const [active,setActive]=useState(null);
+  const [inp,setInp]=useState("");
+  const [genLoading,setGenLoading]=useState(false);
+  const [generated,setGenerated]=useState(null);
+  const [search,setSearch]=useState("");
+  const [notif,setNotif]=useState(null);
+  const [view,setView]=useState("list"); // list | editor | generated
+  const save=(n)=>{LS.s(`notes_${uid}`,n)};
+  const newNote=()=>{
+    const n={id:Date.now(),title:"Untitled Note",content:"",tags:[],pinned:false,created:new Date().toISOString(),generated:null};
+    const updated=[n,...notes];setNotes(updated);save(updated);setActive(n.id);setInp("");setGenerated(null);setView("editor");
+  };
+  const deleteNote=(id)=>{const updated=notes.filter(n=>n.id!==id);setNotes(updated);save(updated);if(active===id){setActive(null);setView("list")}};
+  const updateNote=(id,patch)=>{const updated=notes.map(n=>n.id===id?{...n,...patch}:n);setNotes(updated);save(updated)};
+  const togglePin=(id)=>updateNote(id,{pinned:!notes.find(n=>n.id===id)?.pinned});
+  const generateSmartNotes=async()=>{
+    if(!inp.trim()||!apiKey)return;
+    setGenLoading(true);
+    try{
+      const raw=await groq(apiKey,[{role:"user",content:`Generate smart notes for: "${inp.slice(0,800)}"`}],SYS_NOTES,1000);
+      const jsonMatch=raw.match(/\{[\s\S]*\}/);
+      if(!jsonMatch)throw new Error("Invalid response");
+      const parsed=JSON.parse(jsonMatch[0]);
+      setGenerated(parsed);
+      if(active){updateNote(active,{title:parsed.title||"Smart Note",content:inp,generated:parsed})}
+      setView("generated");
+      setNotif({msg:"Smart notes generated! 🧠",type:"success"});
+    }catch(e){setNotif({msg:"Failed: "+e.message,type:"error"})}
+    setGenLoading(false);
+  };
+  const filtered=notes.filter(n=>n.title.toLowerCase().includes(search.toLowerCase())||n.content.toLowerCase().includes(search.toLowerCase())).sort((a,b)=>b.pinned-a.pinned||(new Date(b.created)-new Date(a.created)));
+  const activeNote=notes.find(n=>n.id===active);
+  const diffColor={easy:"tg",medium:"ta",hard:"tr"};
+  return(
+    <div className="scrollpage">
+      <TopBar title="Smart Notes 📝" user={user} apiKey={apiKey} go={go}>
+        <button className="btn btn-v btn-sm" onClick={newNote}>+ New Note</button>
+      </TopBar>
+      <div className="ppad fu">
+        {notif&&<Notif msg={notif.msg} type={notif.type} onClose={()=>setNotif(null)}/>}
+        <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:18,height:"calc(100vh - 130px)"}}>
+          {/* LEFT: notes list */}
+          <div style={{display:"flex",flexDirection:"column",gap:10,overflowY:"auto"}}>
+            <input className="inp" placeholder="🔍 Search notes…" value={search} onChange={e=>setSearch(e.target.value)} style={{fontSize:12.5}}/>
+            <div style={{fontSize:11.5,color:"var(--tx3)",fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>{filtered.length} notes</div>
+            {filtered.map(n=>(
+              <div key={n.id} onClick={()=>{setActive(n.id);setInp(n.content||"");setGenerated(n.generated||null);setView(n.generated?"generated":"editor")}}
+                style={{padding:"12px 13px",borderRadius:12,cursor:"pointer",background:active===n.id?"rgba(99,102,241,.1)":"var(--surface)",border:`1.5px solid ${active===n.id?"var(--v1)":"var(--br)"}`,transition:"all .2s",position:"relative"}}>
+                {n.pinned&&<span style={{position:"absolute",top:8,right:10,fontSize:12}}>📌</span>}
+                <div style={{fontSize:13,fontWeight:700,color:"var(--tx)",marginBottom:4,paddingRight:20}}>{n.title}</div>
+                <div style={{fontSize:11.5,color:"var(--tx3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.content?.slice(0,60)||"Empty note"}</div>
+                <div style={{fontSize:10.5,color:"var(--tx3)",marginTop:6}}>{new Date(n.created).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</div>
+              </div>
+            ))}
+            {filtered.length===0&&<div className="empty" style={{padding:"20px 0"}}><div style={{fontSize:32}}>📝</div><h3 style={{fontSize:13}}>No notes yet</h3></div>}
+          </div>
+          {/* RIGHT: editor / generated */}
+          <div style={{overflowY:"auto"}}>
+            {!active&&<div className="empty" style={{paddingTop:80}}><div className="empty-ico">📝</div><h3>Select a note or create one</h3><button className="btn btn-v mt4" onClick={newNote}>+ Create First Note</button></div>}
+            {active&&view!=="generated"&&<div className="card" style={{height:"100%",display:"flex",flexDirection:"column",gap:12}}>
+              <input style={{fontSize:18,fontWeight:800,color:"var(--tx)",background:"transparent",border:"none",outline:"none",borderBottom:"2px solid var(--br)",paddingBottom:10}} placeholder="Note title…" value={activeNote?.title||""} onChange={e=>updateNote(active,{title:e.target.value})}/>
+              <div style={{display:"flex",gap:8}}>
+                <button className="btn btn-ghost btn-sm" onClick={()=>togglePin(active)}>{activeNote?.pinned?"📌 Unpin":"📌 Pin"}</button>
+                <button className="btn btn-danger btn-sm" onClick={()=>deleteNote(active)}>🗑 Delete</button>
+                {activeNote?.generated&&<button className="btn btn-out btn-sm" onClick={()=>setView("generated")}>✨ View Smart Notes</button>}
+              </div>
+              <textarea className="inp" style={{flex:1,resize:"none",minHeight:200,fontSize:14,lineHeight:1.75}} placeholder="Paste text, lecture notes, or any content here… then click Generate Smart Notes to get AI-powered structured notes, mnemonics, key points, and exam tips!" value={inp} onChange={e=>{setInp(e.target.value);updateNote(active,{content:e.target.value})}}/>
+              <button className="btn btn-v" onClick={generateSmartNotes} disabled={genLoading||!inp.trim()} style={{alignSelf:"flex-start"}}>
+                {genLoading?<><span className="spin"/> Generating…</>:"🧠 Generate Smart Notes"}
+              </button>
+            </div>}
+            {active&&view==="generated"&&generated&&<div>
+              <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
+                <button className="btn btn-out btn-sm" onClick={()=>setView("editor")}>← Edit Source</button>
+                <h2 style={{fontSize:18,fontWeight:900,color:"var(--tx)",flex:1}}>{generated.title}</h2>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  {generated.difficulty&&<span className={`tag ${diffColor[generated.difficulty]||"tb"}`}>{generated.difficulty}</span>}
+                  {generated.estimatedReadTime&&<span className="tag tc">⏱ {generated.estimatedReadTime}</span>}
+                </div>
+              </div>
+              {generated.summary&&<div className="card mb4" style={{background:"linear-gradient(135deg,rgba(99,102,241,.1),rgba(168,85,247,.08))",border:"1.5px solid rgba(99,102,241,.25)"}}><div className="card-glow"/><div style={{fontSize:12,fontWeight:800,color:"var(--v1)",marginBottom:7}}>📋 OVERVIEW</div><p style={{fontSize:14,color:"var(--tx)",lineHeight:1.8}}>{generated.summary}</p></div>}
+              <div className="g2 mb4">
+                {generated.keyPoints?.length>0&&<div className="card"><div className="card-glow"/><div style={{fontSize:13,fontWeight:800,color:"var(--tx)",marginBottom:10}}>🔑 Key Points</div>{generated.keyPoints.map((p,i)=><div key={i} style={{display:"flex",gap:9,padding:"7px 0",borderBottom:"1px solid var(--br)"}}><span style={{width:20,height:20,borderRadius:"50%",background:"var(--grad)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,flexShrink:0}}>{i+1}</span><span style={{fontSize:13,color:"var(--tx2)",lineHeight:1.5}}>{p}</span></div>)}</div>}
+                {generated.examTips?.length>0&&<div className="card"><div className="card-glow"/><div style={{fontSize:13,fontWeight:800,color:"#F59E0B",marginBottom:10}}>📌 Exam Tips</div>{generated.examTips.map((t,i)=><div key={i} style={{display:"flex",gap:9,padding:"7px 0",borderBottom:"1px solid var(--br)"}}><span style={{fontSize:14}}>💡</span><span style={{fontSize:13,color:"var(--tx2)",lineHeight:1.5}}>{t}</span></div>)}</div>}
+              </div>
+              {generated.mnemonics?.length>0&&<div className="card mb4"><div className="card-glow"/>
+                <div style={{fontSize:13,fontWeight:800,color:"#A855F7",marginBottom:12}}>🧠 Memory Tricks (Mnemonics)</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+                  {generated.mnemonics.map((m,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(168,85,247,.08)",borderRadius:11,border:"1.5px solid rgba(168,85,247,.2)",minWidth:180}}>
+                    <div style={{fontSize:12,fontWeight:800,color:"var(--v3)",marginBottom:4}}>{m.term}</div>
+                    <div style={{fontSize:13,color:"var(--tx2)"}}>{m.mnemonic}</div>
+                  </div>)}
+                </div>
+              </div>}
+              {generated.formulae?.length>0&&<div className="card mb4"><div className="card-glow"/>
+                <div style={{fontSize:13,fontWeight:800,color:"#06B6D4",marginBottom:12}}>🔢 Key Formulae & Facts</div>
+                {generated.formulae.map((f,i)=><div key={i} style={{fontFamily:"var(--mono)",fontSize:13,padding:"8px 12px",background:"var(--bg2)",borderRadius:8,marginBottom:7,color:"var(--tx)",border:"1px solid var(--br)"}}>{f}</div>)}
+              </div>}
+            </div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══ POMODORO FOCUS TIMER ══ */
+function PomodoroTimer({user,go,apiKey}){
+  const uid=user.id;
+  const MODES={work:{label:"Focus",duration:25,color:"#6366F1",emoji:"🎯"},short:{label:"Short Break",duration:5,color:"#10B981",emoji:"☕"},long:{label:"Long Break",duration:15,color:"#06B6D4",emoji:"🌟"}};
+  const [mode,setMode]=useState("work");
+  const [timeLeft,setTimeLeft]=useState(MODES.work.duration*60);
+  const [running,setRunning]=useState(false);
+  const [sessions,setSessions]=useState(LS.g(`pomo_${uid}`,{today:0,total:0,lastDate:""}));
+  const [cycles,setCycles]=useState(0);
+  const [task,setTask]=useState("");
+  const [taskList,setTaskList]=useState(LS.g(`pomo_tasks_${uid}`,[{id:1,text:"Study Data Structures",done:false},{id:2,text:"Review lecture notes",done:false}]));
+  const [newTask,setNewTask]=useState("");
+  const timerRef=useRef();
+  const totalSecs=MODES[mode].duration*60;
+  const pctLeft=Math.round((timeLeft/totalSecs)*100);
+  const circumference=2*Math.PI*54;
+  useEffect(()=>{
+    if(running&&timeLeft>0){timerRef.current=setTimeout(()=>setTimeLeft(t=>t-1),1000);}
+    else if(running&&timeLeft===0){
+      setRunning(false);
+      if(mode==="work"){
+        const today=new Date().toDateString();
+        const s=LS.g(`pomo_${uid}`,{today:0,total:0,lastDate:""});
+        const newToday=s.lastDate===today?s.today+1:1;
+        const updated={today:newToday,total:s.total+1,lastDate:today};
+        setSessions(updated);LS.s(`pomo_${uid}`,updated);
+        const nc=cycles+1;setCycles(nc);
+        setMode(nc%4===0?"long":"short");
+        setTimeLeft(MODES[nc%4===0?"long":"short"].duration*60);
+      }else{setMode("work");setTimeLeft(MODES.work.duration*60);}
+    }
+    return()=>clearTimeout(timerRef.current);
+  },[running,timeLeft]);
+  const reset=()=>{setRunning(false);setTimeLeft(MODES[mode].duration*60)};
+  const switchMode=(m)=>{setRunning(false);setMode(m);setTimeLeft(MODES[m].duration*60)};
+  const addTask=()=>{if(!newTask.trim())return;const t={id:Date.now(),text:newTask.trim(),done:false};const updated=[...taskList,t];setTaskList(updated);LS.s(`pomo_tasks_${uid}`,updated);setNewTask("")};
+  const toggleTask=(id)=>{const updated=taskList.map(t=>t.id===id?{...t,done:!t.done}:t);setTaskList(updated);LS.s(`pomo_tasks_${uid}`,updated)};
+  const removeTask=(id)=>{const updated=taskList.filter(t=>t.id!==id);setTaskList(updated);LS.s(`pomo_tasks_${uid}`,updated)};
+  const mm=Math.floor(timeLeft/60).toString().padStart(2,"0");
+  const ss=(timeLeft%60).toString().padStart(2,"0");
+  const m=MODES[mode];
+  const today=new Date().toDateString();
+  const todaySessions=sessions.lastDate===today?sessions.today:0;
+  return(
+    <div className="scrollpage">
+      <TopBar title="Focus Timer ⏰" user={user} apiKey={apiKey} go={go}/>
+      <div className="ppad fu">
+        <div className="g2">
+          {/* TIMER CARD */}
+          <div className="card" style={{textAlign:"center",padding:"32px 24px"}}>
+            <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:24}}>
+              {Object.entries(MODES).map(([k,v])=><button key={k} onClick={()=>switchMode(k)} style={{padding:"6px 14px",borderRadius:99,fontSize:12,fontWeight:700,border:`2px solid ${mode===k?v.color:"var(--br)"}`,background:mode===k?v.color+"22":"transparent",color:mode===k?v.color:"var(--tx3)",cursor:"pointer",transition:"all .2s"}}>{v.label}</button>)}
+            </div>
+            {/* SVG Ring Timer */}
+            <div style={{position:"relative",display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:24}}>
+              <svg width="160" height="160" viewBox="0 0 160 160" style={{transform:"rotate(-90deg)"}}>
+                <circle cx="80" cy="80" r="54" fill="none" stroke="var(--br)" strokeWidth="10"/>
+                <circle cx="80" cy="80" r="54" fill="none" strokeWidth="10" stroke={m.color} strokeLinecap="round"
+                  strokeDasharray={circumference} strokeDashoffset={circumference*(1-pctLeft/100)}
+                  style={{transition:"stroke-dashoffset 1s linear"}}/>
+              </svg>
+              <div style={{position:"absolute",textAlign:"center"}}>
+                <div style={{fontSize:36,fontWeight:900,color:"var(--tx)",fontFamily:"var(--mono)",letterSpacing:"-2px"}}>{mm}:{ss}</div>
+                <div style={{fontSize:12,color:"var(--tx3)",fontWeight:700}}>{m.emoji} {m.label}</div>
+              </div>
+            </div>
+            {task&&<div style={{padding:"8px 14px",background:"rgba(99,102,241,.08)",borderRadius:99,fontSize:12.5,color:"var(--v1)",fontWeight:600,marginBottom:16,display:"inline-block"}}>🎯 {task}</div>}
+            <div style={{display:"flex",gap:10,justifyContent:"center",marginBottom:20}}>
+              <button className="btn btn-v" style={{minWidth:120,fontSize:15}} onClick={()=>setRunning(r=>!r)}>{running?"⏸ Pause":"▶ Start"}</button>
+              <button className="btn btn-out" onClick={reset}>↺ Reset</button>
+            </div>
+            {/* Session dots */}
+            <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:16}}>
+              {[0,1,2,3].map(i=><div key={i} style={{width:14,height:14,borderRadius:"50%",background:i<(cycles%4)?MODES.work.color:"var(--br)",transition:"background .3s",boxShadow:i<(cycles%4)?`0 0 8px ${MODES.work.color}`:"none"}}/>)}
+            </div>
+            <div style={{display:"flex",gap:20,justifyContent:"center"}}>
+              {[{v:todaySessions,l:"Today's Sessions",e:"🎯"},{v:sessions.total,l:"All Time",e:"🏆"},{v:Math.round(sessions.total*25/60),l:"Hours Focused",e:"⏰"}].map((s,i)=>(
+                <div key={i} style={{textAlign:"center"}}>
+                  <div style={{fontSize:20,fontWeight:900,color:"var(--tx)"}}>{s.v}</div>
+                  <div style={{fontSize:10.5,color:"var(--tx3)",fontWeight:600}}>{s.e} {s.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* TASK LIST */}
+          <div className="card"><div className="card-glow"/>
+            <div className="card-hd"><div className="card-title">📋 Session Tasks</div><span className="tag tg">{taskList.filter(t=>t.done).length}/{taskList.length} done</span></div>
+            <div style={{display:"flex",gap:8,marginBottom:16}}>
+              <input className="inp" placeholder="Add a task for this session…" value={newTask} onChange={e=>setNewTask(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addTask()} style={{fontSize:13}}/>
+              <button className="btn btn-v btn-sm" onClick={addTask}>+</button>
+            </div>
+            <div style={{display:"flex",gap:8,marginBottom:14}}>
+              <input className="inp" placeholder="What are you focusing on? (shown on timer)" value={task} onChange={e=>setTask(e.target.value)} style={{fontSize:12.5}}/>
+            </div>
+            <div style={{maxHeight:300,overflowY:"auto"}}>
+              {taskList.length===0&&<div className="empty" style={{padding:"20px 0"}}><div style={{fontSize:28}}>✅</div><h3 style={{fontSize:13}}>No tasks yet</h3></div>}
+              {taskList.map(t=>(
+                <div key={t.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:"1px solid var(--br)"}}>
+                  <div onClick={()=>toggleTask(t.id)} style={{width:22,height:22,borderRadius:7,flexShrink:0,border:`2px solid ${t.done?"transparent":"var(--br2)"}`,background:t.done?"var(--grad)":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{t.done&&<span style={{color:"#fff",fontSize:11,fontWeight:900}}>✓</span>}</div>
+                  <span style={{flex:1,fontSize:13.5,color:"var(--tx)",textDecoration:t.done?"line-through":"none",opacity:t.done?.5:1}}>{t.text}</span>
+                  <button className="btn-icon" style={{width:26,height:26,fontSize:12}} onClick={()=>removeTask(t.id)}>✕</button>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:16,padding:"12px 14px",background:"var(--bg2)",borderRadius:11,border:"1px solid var(--br)"}}>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--tx)",marginBottom:8}}>🍅 Pomodoro Technique</div>
+              <div style={{fontSize:12,color:"var(--tx3)",lineHeight:1.7}}>Work for <strong style={{color:"var(--v1)"}}>25 minutes</strong> → Short break <strong style={{color:"#10B981"}}>5 mins</strong> → After 4 cycles, Long break <strong style={{color:"#06B6D4"}}>15 mins</strong>. Proven to boost focus and reduce mental fatigue.</div>
+            </div>
+          </div>
+        </div>
+        {/* Productivity chart would go here */}
+        <div className="card mt4"><div className="card-glow"/>
+          <div className="card-hd"><div><div className="card-title">📊 Focus Analytics</div><div className="card-sub">Your concentration patterns</div></div></div>
+          <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+            {[{l:"Best Streak",v:`${Math.max(1,sessions.total)} sessions`,e:"🔥"},{l:"Focus Time",v:`${Math.round(sessions.total*25/60)}h ${(sessions.total*25)%60}m`,e:"⏱️"},{l:"Completed Today",v:`${todaySessions} sessions`,e:"✅"},{l:"Productivity Score",v:`${Math.min(100,todaySessions*20)}%`,e:"📈"}].map((s,i)=>(
+              <div key={i} style={{flex:1,minWidth:120,padding:"16px",background:"var(--bg2)",borderRadius:14,border:"1px solid var(--br)",textAlign:"center"}}>
+                <div style={{fontSize:22}}>{s.e}</div>
+                <div style={{fontSize:18,fontWeight:900,color:"var(--tx)",margin:"6px 0"}}>{s.v}</div>
+                <div style={{fontSize:11,color:"var(--tx3)",fontWeight:600}}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ══ ROOT APP ══ */
 function App(){
   const DEFAULT_KEY="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";
@@ -1499,7 +1876,7 @@ function App(){
   const go=(p)=>{setPage(p);setMobileOpen(false)};
   const props={user,apiKey,go,onLogout:logout,onUpdateUser:upd,onSaveKey:saveKey};
   if(!user)return <Auth onLogin={login}/>;
-  const renderPage=()=>{switch(page){case"dashboard":return<Dashboard {...props}/>;case"chat":return<Chat {...props}/>;case"quiz":return<Quiz {...props}/>;case"plan":return<Plan {...props}/>;case"flashcards":return<Flashcards {...props}/>;case"progress":return<Progress {...props}/>;case"weakness":return<Weakness {...props}/>;case"leaderboard":return<Leaderboard {...props}/>;case"profile":return<ProfilePage {...props}/>;case"settings":return<Settings {...props}/>;default:return<Dashboard {...props}/>}};
+  const renderPage=()=>{switch(page){case"dashboard":return<Dashboard {...props}/>;case"chat":return<Chat {...props}/>;case"quiz":return<Quiz {...props}/>;case"plan":return<Plan {...props}/>;case"flashcards":return<Flashcards {...props}/>;case"progress":return<Progress {...props}/>;case"weakness":return<Weakness {...props}/>;case"leaderboard":return<Leaderboard {...props}/>;case"profile":return<ProfilePage {...props}/>;case"settings":return<Settings {...props}/>;case"interview":return<InterviewPrep {...props}/>;case"notes":return<SmartNotes {...props}/>;case"pomodoro":return<PomodoroTimer {...props}/>;default:return<Dashboard {...props}/>}};
   return(
     <div className="shell">
       <button className="sb-hamb" onClick={()=>setMobileOpen(o=>!o)}>☰</button>
