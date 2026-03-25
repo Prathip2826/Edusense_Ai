@@ -398,7 +398,7 @@ const SUBJECTS=[
 const SYS_TUTOR=(name,subj)=>`You are EduSense AI Tutor, an expert academic assistant for ${name}, specialised in ${subj}. Be clear, engaging, and give structured explanations with examples. Use markdown for formatting. Always end with a question to check understanding.`;
 const SYS_QUIZ=`You are an expert quiz generator. Generate exactly 5 multiple-choice questions. Return ONLY valid JSON in this exact format: {"questions":[{"q":"Question text","options":["Option A full text","Option B full text","Option C full text","Option D full text"],"correct":"A","explanation":"Why A is correct"}]}. IMPORTANT: The "correct" field must be the LETTER (A/B/C/D) that corresponds to the correct option in the options array. No extra text.`;
 const SYS_PLAN=(days,weak)=>`You are an expert academic planner. Create a structured ${days}-day study plan. Return ONLY valid JSON: {"title":"Plan title","duration":${days},"overview":"Brief description","days":[{"day":1,"goal":"Day goal","tip":"Study tip","topics":[{"name":"Topic","type":"concept|practice|revision|mock-test","duration":"30 mins","notes":"Notes"}]}]}. Focus weak areas: ${weak}.`;
-const SYS_ANALYSIS=`You are an academic performance analyst. Analyse quiz history and return JSON: {"summary":"Overall learning summary in 2-3 sentences","weakAreas":[{"topic":"name","rootCause":"why struggling","fix":"specific action"}],"strengths":["strength1"],"priorityActions":["Step 1","Step 2","Step 3","Step 4","Step 5"],"estimatedImprovement":"Expected improvement","weeklyGoal":"This week's focus goal","studyStyle":"Recommended study style","motivationTip":"Personalised motivational message"}`;
+const SYS_ANALYSIS=`You are an academic performance analyst. You MUST respond with ONLY a raw JSON object — no explanation, no markdown, no code fences, no preamble. Start your response with { and end with }. Use this exact schema: {"summary":"string","weakAreas":[{"topic":"string","rootCause":"string","fix":"string"}],"strengths":["string"],"priorityActions":["string","string","string","string","string"],"estimatedImprovement":"string","weeklyGoal":"string","studyStyle":"string","motivationTip":"string"}`;
 const SYS_FLASH=`You are a flashcard generator. Generate 10 flashcards for the given topic. Return ONLY valid JSON: {"cards":[{"front":"Question or term","back":"Answer or definition"}]}`;
 
 /* ══ GAMIFICATION ══ */
@@ -1084,8 +1084,11 @@ function Weakness({user,apiKey,go}){
     setL(true);
     const summary={totalQuizzes:hist.length,avgScore:Math.round(hist.reduce((a,q)=>a+q.score,0)/(hist.length||1)),weakTopics:weak.map(t=>`${t.t}:${t.avg}%`).join(", "),strongTopics:strong.map(t=>`${t.t}:${t.avg}%`).join(", "),subject:subj.l,recentScores:hist.slice(-5).map(q=>`${q.topic}:${q.score}%`).join(", ")};
     try{
-      const raw=await groq(apiKey,[{role:"user",content:`Student data: ${JSON.stringify(summary)}`}],SYS_ANALYSIS,1200);
-      const parsed=JSON.parse(raw.replace(/```json?|```/g,"").trim());
+      const raw=await groq(apiKey,[{role:"user",content:`Analyse this student data and respond ONLY with JSON: ${JSON.stringify(summary)}`}],SYS_ANALYSIS,1400);
+      // Robust extraction: find the first { ... } block even if AI adds text around it
+      const jsonMatch=raw.match(/\{[\s\S]*\}/);
+      if(!jsonMatch)throw new Error("No JSON found in response");
+      const parsed=JSON.parse(jsonMatch[0]);
       setAnalysis(parsed);LS.s(`analysis_${uid}`,parsed);
       setNotif({msg:"Analysis complete!",type:"success"});
     }catch(e){setNotif({msg:"Analysis failed: "+e.message,type:"error"})}
