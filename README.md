@@ -51,7 +51,7 @@
 > Built in under 48 hours for **MEGAVERSE 2026** by the AIDS Department team at **Muthayammal Engineering College, Rasipuram**.
 
 ---
-
+.
 ## ✨ Features
 
 | Feature | Description |
